@@ -3,49 +3,54 @@ package main
 import (
 	"fmt"
 	"os"
-	"regexp"
+	"path/filepath"
 )
 
 type cli struct {
 	token string
-	regex *regexp.Regexp
+	query string
 	lang  string
 	dist  string
 }
 
+func (c *cli) ensureReposDir() error {
+	dir := filepath.Join(c.dist, "repos")
+	s, err := os.Stat(dir)
+	if err != nil {
+		if err := os.Mkdir(dir, os.ModeDir); err != nil {
+			return err
+		}
+	}
+	if !s.IsDir() {
+		return fmt.Errorf("Cannot create directory '%s' because it's a file", dir)
+	}
+	return nil
+}
+
 func (c *cli) run() (err error) {
+	if err = c.ensureReposDir(); err != nil {
+		return
+	}
 	return
 }
 
-func newCLI(t, r, l, d string) (*cli, error) {
-	if t == "" || r == "" || l == "" {
+func newCLI(t, q, l, d string) (*cli, error) {
+	env := os.Getenv("GITHUB_TOKEN")
+	if env != "" {
+		t = env
+	}
+
+	if t == "" || l == "" {
 		return nil, fmt.Errorf("All of token, regex and lang must be set. Please see -help for more detail")
 	}
 
-	re, err := regexp.Compile(r)
-	if err != nil {
-		return nil, err
-	}
-
 	if d == "" {
+		var err error
 		d, err = os.Getwd()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return &cli{t, re, l, d}, nil
-}
-
-func start(token, regex, lang, dist string) int {
-	c, err := newCLI(token, regex, lang, dist)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return 3
-	}
-	if err = c.run(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return 3
-	}
-	return 0
+	return &cli{t, q, l, d}, nil
 }
