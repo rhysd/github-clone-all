@@ -4,7 +4,9 @@ import (
 	"context"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
+	"log"
 	"math"
+	"time"
 )
 
 type collector struct {
@@ -12,6 +14,7 @@ type collector struct {
 	maxPage uint
 	page    uint
 	query   string
+	dist    string
 	client  *github.Client
 	ctx     context.Context
 }
@@ -31,7 +34,24 @@ func (col *collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 }
 
 func (col *collector) collect() error {
-	return nil // TODO
+	// TODO: Create cloners
+	for col.page <= col.maxPage {
+		res, err := col.searchRepos()
+		if _, ok := err.(*github.RateLimitError); ok {
+			time.Sleep(1 * time.Minute)
+			continue
+		} else if err != nil {
+			return err
+		}
+		if res.GetIncompleteResults() {
+			log.Println("TODO: Handle incomplete result returned from GitHub API")
+		}
+
+		// TODO: Pass repositories to cloners
+
+		col.page++
+	}
+	return nil
 }
 
 type pageConfig struct {
@@ -42,13 +62,13 @@ type pageConfig struct {
 
 const pageUnlimited uint = 0
 
-func newCollector(query string, token string, page *pageConfig) *collector {
+func newCollector(query, token, dist string, page *pageConfig) *collector {
 	ctx := context.Background()
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 	client := github.NewClient(oauth2.NewClient(ctx, src))
-	c := &collector{100, pageUnlimited, 1, query, client, ctx}
+	c := &collector{100, pageUnlimited, 1, query, dist, client, ctx}
 	if page != nil {
 		c.perPage = page.per
 		c.maxPage = page.max

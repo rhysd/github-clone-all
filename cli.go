@@ -31,7 +31,7 @@ func (c *cli) run() (err error) {
 	if err = c.ensureReposDir(); err != nil {
 		return
 	}
-	col := newCollector(c.query, c.token, nil)
+	col := newCollector(c.query, c.token, c.dist, nil)
 	err = col.collect()
 	return
 }
