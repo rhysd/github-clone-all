@@ -5,12 +5,12 @@ import (
 )
 
 func TestNewCollector(t *testing.T) {
-	c := newCollector("foo", nil)
+	c := newCollector("foo", "", nil)
 	if c.perPage != 100 {
 		t.Error("perPage should be 100 by default:", c.perPage)
 	}
-	if c.maxPage != pageUnlimited {
-		t.Error("maxPage should be 0 by default:", c.maxPage)
+	if c.maxPage != 10 {
+		t.Error("maxPage should be 10 by default:", c.maxPage)
 	}
 	if c.page != 1 {
 		t.Error("page should be 1 by default:", c.page)
@@ -21,7 +21,7 @@ func TestNewCollector(t *testing.T) {
 }
 
 func TestNewCollectorWithConfig(t *testing.T) {
-	c := newCollector("foo", &pageConfig{1, 10, 3})
+	c := newCollector("foo", "", &pageConfig{1, 10, 3})
 	if c.perPage != 1 {
 		t.Error("perPage should be set to 1:", c.perPage)
 	}
@@ -30,5 +30,10 @@ func TestNewCollectorWithConfig(t *testing.T) {
 	}
 	if c.page != 3 {
 		t.Error("page should be set to 3:", c.page)
+	}
+
+	c = newCollector("foo", "", &pageConfig{3, pageUnlimited, 3})
+	if c.maxPage != 334 {
+		t.Error("maxPage should be calculated to fetch 1000 repos:", c.maxPage)
 	}
 }
