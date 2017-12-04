@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 	"log"
@@ -34,7 +35,11 @@ func (col *collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 }
 
 func (col *collector) collect() error {
-	// TODO: Create cloners
+	cloners := make([]*cloner, 0, 4)
+	for i := 0; i < 4; i++ {
+		cloners = append(cloners, newCloner(col.dist))
+	}
+
 	for col.page <= col.maxPage {
 		res, err := col.searchRepos()
 		if _, ok := err.(*github.RateLimitError); ok {
@@ -47,10 +52,19 @@ func (col *collector) collect() error {
 			log.Println("TODO: Handle incomplete result returned from GitHub API")
 		}
 
-		// TODO: Pass repositories to cloners
+		// TODO: 空いているやつに優先的に割り当てていくスケジューラをつくる（もしくはライブラリを調べて使う）
+		for i, repo := range res.GetRepositories() {
+			c := cloners[i%4]
+			c.recv <- fmt.Srpintf("%s/%s", repo.GetName(), repo.GetOwner().GetLogin())
+		}
 
 		col.page++
 	}
+
+	for _, c := range cloners {
+		close(c.recv)
+	}
+
 	return nil
 }
 
