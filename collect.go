@@ -37,7 +37,9 @@ func (col *collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 func (col *collector) collect() error {
 	cloners := make([]*cloner, 0, 4)
 	for i := 0; i < 4; i++ {
-		cloners = append(cloners, newCloner(col.dist))
+		c := newCloner(col.dist)
+		cloners = append(cloners, c)
+		go c.start()
 	}
 
 	for col.page <= col.maxPage {
@@ -53,16 +55,16 @@ func (col *collector) collect() error {
 		}
 
 		// TODO: 空いているやつに優先的に割り当てていくスケジューラをつくる（もしくはライブラリを調べて使う）
-		for i, repo := range res.GetRepositories() {
+		for i, repo := range res.Repositories {
 			c := cloners[i%4]
-			c.recv <- fmt.Srpintf("%s/%s", repo.GetName(), repo.GetOwner().GetLogin())
+			c.recv <- fmt.Sprintf("%s/%s", repo.GetName(), repo.GetOwner().GetLogin())
 		}
 
 		col.page++
 	}
 
 	for _, c := range cloners {
-		close(c.recv)
+		close(c.recv) // Sends "" to c.recv
 	}
 
 	return nil
