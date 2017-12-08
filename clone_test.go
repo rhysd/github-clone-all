@@ -2,8 +2,8 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
-	"time"
 )
 
 func TestNewCloner(t *testing.T) {
@@ -24,23 +24,58 @@ func TestNewCloner(t *testing.T) {
 	os.Setenv("GIT_EXECUTABLE_PATH", "")
 }
 
-func TestCloneRepo(t *testing.T) {
+func testRepos(repos []string, t *testing.T) {
 	c := newCloner("test")
 	defer func() {
 		os.RemoveAll("test")
 	}()
-	go c.clone("rhysd/clever-f.vim")
-	select {
-	case <-c.done:
-		s, err := os.Stat("test/rhysd/clever-f.vim")
+
+	for _, r := range repos {
+		c.clone(r)
+	}
+	c.waitDone()
+
+	for _, r := range repos {
+		p := filepath.FromSlash("test/" + r)
+		s, err := os.Stat(p)
 		if err != nil {
-			t.Fatal("Cloned directory not found:", err)
+			t.Fatal("Cloned directory not found:", p, err)
 		}
 		if !s.IsDir() {
-			t.Fatal("It should clone directory")
-		}
-		if c.err != nil {
-			t.Fatal("Error was reported for existing repo:", err)
+			t.Fatal("It should clone directory", p)
 		}
 	}
+
+	if c.lastErr != nil {
+		t.Fatal("Error was reported on cloning existing repo:", c.lastErr)
+	}
+}
+
+func TestClon1Repo(t *testing.T) {
+	testRepos([]string{"rhysd/github-complete.vim"}, t)
+}
+
+func TestCloneAFewRepos(t *testing.T) {
+	repos := []string{
+		"rhysd/clever-f.vim",
+		"rhysd/neovim-component",
+		"rhysd/vim-gfm-syntax",
+	}
+	testRepos(repos, t)
+}
+
+func TestCloneManyRepos(t *testing.T) {
+	repos := []string{
+		"rhysd/inu-snippets",
+		"rhysd/conflict-marker.vim",
+		"rhysd/committia.vim",
+		"rhysd/vim-dachs",
+		"rhysd/rust-doc.vim",
+		"rhysd/vim-crystal",
+		"rhysd/vim-wasm",
+		"rhysd/unite-go-import.vim",
+		"rhysd/NyaoVim",
+		"rhysd/vim-color-spring-night",
+	}
+	testRepos(repos, t)
 }
