@@ -29,15 +29,18 @@ func TestCloneRepo(t *testing.T) {
 	defer func() {
 		os.RemoveAll("test")
 	}()
-	go c.start()
-	c.recv <- "rhysd/clever-f.vim"
-	time.Sleep(5 * time.Second)
-	s, err := os.Stat("test/rhysd/clever-f.vim")
-	if err != nil {
-		t.Fatal("Cloned directory not found:", err)
+	go c.clone("rhysd/clever-f.vim")
+	select {
+	case <-c.done:
+		s, err := os.Stat("test/rhysd/clever-f.vim")
+		if err != nil {
+			t.Fatal("Cloned directory not found:", err)
+		}
+		if !s.IsDir() {
+			t.Fatal("It should clone directory")
+		}
+		if c.err != nil {
+			t.Fatal("Error was reported for existing repo:", err)
+		}
 	}
-	if !s.IsDir() {
-		t.Fatal("It should clone directory")
-	}
-	close(c.recv)
 }

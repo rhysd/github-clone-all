@@ -35,12 +35,7 @@ func (col *collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 }
 
 func (col *collector) collect() error {
-	cloners := make([]*cloner, 0, 4)
-	for i := 0; i < 4; i++ {
-		c := newCloner(col.dist)
-		cloners = append(cloners, c)
-		go c.start()
-	}
+	cloner := newCloner(col.dist)
 
 	for col.page <= col.maxPage {
 		res, err := col.searchRepos()
@@ -54,18 +49,14 @@ func (col *collector) collect() error {
 			log.Println("TODO: Handle incomplete result returned from GitHub API")
 		}
 
-		// TODO: 空いているやつに優先的に割り当てていくスケジューラをつくる（もしくはライブラリを調べて使う）
-		for i, repo := range res.Repositories {
-			c := cloners[i%4]
-			c.recv <- fmt.Sprintf("%s/%s", repo.GetName(), repo.GetOwner().GetLogin())
+		for _, repo := range res.Repositories {
+			cloner.clone(fmt.Sprintf("%s/%s", repo.GetName(), repo.GetOwner().GetLogin()))
 		}
 
 		col.page++
 	}
 
-	for _, c := range cloners {
-		close(c.recv) // Sends "" to c.recv
-	}
+	cloner.waitDone()
 
 	return nil
 }

@@ -8,9 +8,10 @@ import (
 )
 
 type cloner struct {
-	recv chan string
 	git  string
 	dist string
+	ret  []chan error
+	done []bool
 }
 
 func newCloner(dist string) *cloner {
@@ -18,30 +19,73 @@ func newCloner(dist string) *cloner {
 	if git == "" {
 		git = "git"
 	}
-	return &cloner{make(chan string), git, dist}
+
+	ret := make([]chan error, 0, 4)
+	for i := 0; i < 4; i++ {
+		ret = append(ret, make(chan error))
+	}
+
+	done := make([]bool, 0, 4)
+	for i := 0; i < 4; i++ {
+		done = append(done, true)
+	}
+
+	return &cloner{git, dist, ret, done}
 }
 
-func (cl *cloner) clone(repo string) error {
+// Note: This function is run in another goroutine. It should not share the state with cloner so it should not be a method of cloner.
+func clone(git, repo, dist string, done chan error) {
+	log.Println("Cloning", repo)
 	url := fmt.Sprintf("https://github.com/%s.git", repo)
-	dist := fmt.Sprintf("%s/%s", cl.dist, repo)
-	cmd := exec.Command(cl.git, "clone", "--depth=1", "--single-branch", url, dist)
-	return cmd.Run()
+	dir := fmt.Sprintf("%s/%s", dist, repo)
+	cmd := exec.Command(git, "clone", "--depth=1", "--single-branch", url, dir)
+	err := cmd.Run()
+	log.Println("Cloned:", repo)
+	done <- err
 }
 
-func (cl *cloner) start() {
-	for {
-		select {
-		case repo := <-cl.recv:
-			if repo == "" {
-				// When channel is closed
-				return
-			}
-			log.Println("Cloning", repo)
-			if err := cl.clone(repo); err != nil {
-				log.Println("Failed to clone", repo)
-			} else {
-				log.Println("Cloned", repo)
-			}
+func (cl *cloner) waitOne() (int, error) {
+	select {
+	case err := <-cl.ret[0]:
+		cl.done[0] = true
+		return 0, err
+	case err := <-cl.ret[1]:
+		cl.done[1] = true
+		return 1, err
+	case err := <-cl.ret[2]:
+		cl.done[2] = true
+		return 2, err
+	case err := <-cl.ret[3]:
+		cl.done[3] = true
+		return 3, err
+	default:
+		panic("unreachable")
+	}
+}
+
+func (cl *cloner) waitDone() {
+	for !cl.done[0] || !cl.done[1] || !cl.done[2] || !cl.done[3] {
+		if _, err := cl.waitOne(); err != nil {
+			log.Println("Failed to clone:", err)
 		}
 	}
+}
+
+// Clones the repository in other goroutine
+func (cl *cloner) clone(repo string) {
+	for i, done := range cl.done {
+		if done {
+			cl.done[i] = false
+			go clone(cl.git, repo, cl.dist, cl.ret[i])
+			return
+		}
+	}
+
+	idx, err := cl.waitOne()
+	if err != nil {
+		log.Println("Failed to clone:", err)
+	}
+
+	cl.done[idx] = false
+	go clone(cl.git, repo, cl.dist, cl.ret[idx])
 }
