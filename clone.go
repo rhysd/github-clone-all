@@ -10,28 +10,28 @@ import (
 type cloner struct {
 	git     string
 	dist    string
-	ret     []chan error
-	done    []bool
+	ret     [4]chan error
+	done    [4]bool
 	lastErr error
 }
 
 func newCloner(dist string) *cloner {
-	git := os.Getenv("GIT_EXECUTABLE_PATH")
-	if git == "" {
-		git = "git"
+	c := &cloner{dist: dist}
+
+	c.git = os.Getenv("GIT_EXECUTABLE_PATH")
+	if c.git == "" {
+		c.git = "git"
 	}
 
-	ret := make([]chan error, 0, 4)
-	for i := 0; i < 4; i++ {
-		ret = append(ret, make(chan error))
+	for i := range c.ret {
+		c.ret[i] = make(chan error)
 	}
 
-	done := make([]bool, 0, 4)
-	for i := 0; i < 4; i++ {
-		done = append(done, true)
+	for i := range c.done {
+		c.done[i] = true
 	}
 
-	return &cloner{git, dist, ret, done, nil}
+	return c
 }
 
 // Note: This function is run in another goroutine. It should not share the state with cloner so it should not be a method of cloner.
