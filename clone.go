@@ -8,10 +8,11 @@ import (
 )
 
 type cloner struct {
-	git  string
-	dist string
-	ret  []chan error
-	done []bool
+	git     string
+	dist    string
+	ret     []chan error
+	done    []bool
+	lastErr error
 }
 
 func newCloner(dist string) *cloner {
@@ -30,7 +31,7 @@ func newCloner(dist string) *cloner {
 		done = append(done, true)
 	}
 
-	return &cloner{git, dist, ret, done}
+	return &cloner{git, dist, ret, done, nil}
 }
 
 // Note: This function is run in another goroutine. It should not share the state with cloner so it should not be a method of cloner.
@@ -44,48 +45,49 @@ func clone(git, repo, dist string, done chan error) {
 	done <- err
 }
 
-func (cl *cloner) waitOne() (int, error) {
+func (cl *cloner) waitOne() (idx int) {
+	var err error
+
 	select {
-	case err := <-cl.ret[0]:
+	case err = <-cl.ret[0]:
 		cl.done[0] = true
-		return 0, err
-	case err := <-cl.ret[1]:
+		idx = 0
+	case err = <-cl.ret[1]:
 		cl.done[1] = true
-		return 1, err
-	case err := <-cl.ret[2]:
+		idx = 1
+	case err = <-cl.ret[2]:
 		cl.done[2] = true
-		return 2, err
-	case err := <-cl.ret[3]:
+		idx = 2
+	case err = <-cl.ret[3]:
 		cl.done[3] = true
-		return 3, err
-	default:
-		panic("unreachable")
+		idx = 3
 	}
+
+	if err != nil {
+		log.Println("Failed to clone:", err)
+		cl.lastErr = err
+	}
+	return
 }
 
 func (cl *cloner) waitDone() {
 	for !cl.done[0] || !cl.done[1] || !cl.done[2] || !cl.done[3] {
-		if _, err := cl.waitOne(); err != nil {
-			log.Println("Failed to clone:", err)
-		}
+		cl.waitOne()
 	}
+}
+
+func (cl *cloner) cloneWith(idx int, repo string) {
+	cl.done[idx] = false
+	go clone(cl.git, repo, cl.dist, cl.ret[idx])
 }
 
 // Clones the repository in other goroutine
 func (cl *cloner) clone(repo string) {
 	for i, done := range cl.done {
 		if done {
-			cl.done[i] = false
-			go clone(cl.git, repo, cl.dist, cl.ret[i])
+			cl.cloneWith(i, repo)
 			return
 		}
 	}
-
-	idx, err := cl.waitOne()
-	if err != nil {
-		log.Println("Failed to clone:", err)
-	}
-
-	cl.done[idx] = false
-	go clone(cl.git, repo, cl.dist, cl.ret[idx])
+	cl.cloneWith(cl.waitOne(), repo)
 }
