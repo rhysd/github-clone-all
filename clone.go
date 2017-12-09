@@ -50,18 +50,15 @@ func (cl *cloner) waitOne() (idx int) {
 
 	select {
 	case err = <-cl.ret[0]:
-		cl.done[0] = true
 		idx = 0
 	case err = <-cl.ret[1]:
-		cl.done[1] = true
 		idx = 1
 	case err = <-cl.ret[2]:
-		cl.done[2] = true
 		idx = 2
 	case err = <-cl.ret[3]:
-		cl.done[3] = true
 		idx = 3
 	}
+	cl.done[idx] = true
 
 	if err != nil {
 		log.Println("Failed to clone:", err)
@@ -76,18 +73,24 @@ func (cl *cloner) waitDone() {
 	}
 }
 
-func (cl *cloner) cloneWith(idx int, repo string) {
+func (cl *cloner) cloneWith(idx int, repo string) (started bool) {
+	if !cl.done[idx] {
+		return
+	}
 	cl.done[idx] = false
 	go clone(cl.git, repo, cl.dist, cl.ret[idx])
+	started = true
+	return
 }
 
 // Clones the repository in other goroutine
 func (cl *cloner) clone(repo string) {
 	for i, done := range cl.done {
-		if done {
-			cl.cloneWith(i, repo)
+		if cl.cloneWith(i, repo) {
 			return
 		}
 	}
-	cl.cloneWith(cl.waitOne(), repo)
+	if !cl.cloneWith(cl.waitOne(), repo) {
+		panic("unreachable: cannot start clone after waitOne()")
+	}
 }
