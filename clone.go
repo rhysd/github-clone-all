@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sync"
 )
 
@@ -47,7 +48,7 @@ func (cl *cloner) newWorker() {
 		for repo := range cl.repos {
 			log.Println("Cloning", repo)
 			url := fmt.Sprintf("https://github.com/%s.git", repo)
-			dir := fmt.Sprintf("%s/%s", dist, repo)
+			dir := filepath.FromSlash(fmt.Sprintf("%s/%s", dist, repo))
 			cmd := exec.Command(git, "clone", "--depth=1", "--single-branch", url, dir)
 			err := cmd.Run()
 			if err != nil {
