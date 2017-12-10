@@ -56,7 +56,7 @@ func (col *collector) collect() error {
 		col.page++
 	}
 
-	cloner.waitDone()
+	cloner.shutdown()
 
 	return nil
 }

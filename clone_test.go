@@ -29,11 +29,12 @@ func testRepos(repos []string, t *testing.T) {
 	defer func() {
 		os.RemoveAll("test")
 	}()
+	c.start()
 
 	for _, r := range repos {
 		c.clone(r)
 	}
-	c.waitDone()
+	c.shutdown()
 
 	for _, r := range repos {
 		p := filepath.FromSlash("test/" + r)
@@ -45,13 +46,9 @@ func testRepos(repos []string, t *testing.T) {
 			t.Fatal("It should clone directory", p)
 		}
 	}
-
-	if c.lastErr != nil {
-		t.Fatal("Error was reported on cloning existing repo:", c.lastErr)
-	}
 }
 
-func TestClon1Repo(t *testing.T) {
+func TestClone1Repo(t *testing.T) {
 	testRepos([]string{"rhysd/github-complete.vim"}, t)
 }
 
