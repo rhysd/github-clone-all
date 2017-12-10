@@ -37,6 +37,7 @@ func (col *collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 }
 
 func (col *collector) collect() error {
+	log.Println("Search GitHub repositories with query:", col.query)
 	cloner := newCloner(col.dist, col.extract)
 
 	for col.page <= col.maxPage {

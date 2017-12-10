@@ -6,18 +6,15 @@ import (
 )
 
 func TestNewCLI(t *testing.T) {
-	cli, err := newCLI("token", "query", "lang", "dist", "")
+	cli, err := newCLI("token", "foo stars>1", "lang", "dist", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if cli.token != "token" {
 		t.Error("Unexpected token", cli.token)
 	}
-	if cli.query != "query" {
+	if cli.query != "foo stars>1 language:lang fork:false" {
 		t.Error("Unexpected query", cli.query)
-	}
-	if cli.lang != "lang" {
-		t.Error("Unexpected lang", cli.lang)
 	}
 	if cli.dist != "dist" {
 		t.Error("Unexpected dist", cli.dist)

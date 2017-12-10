@@ -10,9 +10,8 @@ import (
 type cli struct {
 	token   string
 	query   string
-	lang    string
 	dist    string
-	extract *regexp.Regexp
+	extract *regexp.Regexp // Maybe nil
 }
 
 func (c *cli) ensureReposDir() error {
@@ -33,7 +32,6 @@ func (c *cli) run() (err error) {
 	if err = c.ensureReposDir(); err != nil {
 		return
 	}
-	// TODO: Build query
 	col := newCollector(c.query, c.token, c.dist, c.extract, nil)
 	err = col.collect()
 	return
@@ -42,13 +40,12 @@ func (c *cli) run() (err error) {
 func newCLI(t, q, l, d, e string) (*cli, error) {
 	var err error
 
-	env := os.Getenv("GITHUB_TOKEN")
-	if env != "" {
+	if env := os.Getenv("GITHUB_TOKEN"); env != "" {
 		t = env
 	}
 
 	if t == "" || l == "" {
-		return nil, fmt.Errorf("All of token, regex and lang must be set. Please see -help for more detail")
+		return nil, fmt.Errorf("API token and language must be set. Please see -help for more detail")
 	}
 
 	if d == "" {
@@ -66,5 +63,6 @@ func newCLI(t, q, l, d, e string) (*cli, error) {
 		}
 	}
 
-	return &cli{t, q, l, d, r}, nil
+	q = fmt.Sprintf("%s language:%s fork:false", q, l)
+	return &cli{t, q, d, r}, nil
 }
