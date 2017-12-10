@@ -8,29 +8,6 @@ import (
 	"sync"
 )
 
-type worker struct {
-	git   string
-	dist  string
-	repos chan string
-	ret   chan error
-	wg    *sync.WaitGroup
-}
-
-func (w *worker) start() {
-	defer w.wg.Done()
-	for repo := range w.repos {
-		log.Println("Cloning", repo)
-		url := fmt.Sprintf("https://github.com/%s.git", repo)
-		dir := fmt.Sprintf("%s/%s", w.dist, repo)
-		cmd := exec.Command(w.git, "clone", "--depth=1", "--single-branch", url, dir)
-		err := cmd.Run()
-		if err != nil {
-			w.ret <- err
-		}
-		log.Println("Cloned:", repo)
-	}
-}
-
 const maxConcurrency = 4
 const maxBuffer = 1000
 
@@ -61,11 +38,29 @@ func (cl *cloner) clone(repo string) {
 	cl.repos <- repo
 }
 
+func (cl *cloner) newWorker() {
+	cl.wg.Add(1)
+	dist := cl.dist
+	git := cl.git
+	go func() {
+		defer cl.wg.Done()
+		for repo := range cl.repos {
+			log.Println("Cloning", repo)
+			url := fmt.Sprintf("https://github.com/%s.git", repo)
+			dir := fmt.Sprintf("%s/%s", dist, repo)
+			cmd := exec.Command(git, "clone", "--depth=1", "--single-branch", url, dir)
+			err := cmd.Run()
+			if err != nil {
+				cl.err <- err
+			}
+			log.Println("Cloned:", repo)
+		}
+	}()
+}
+
 func (cl *cloner) start() {
 	for i := 0; i < maxConcurrency; i++ {
-		w := &worker{cl.git, cl.dist, cl.repos, cl.err, &cl.wg}
-		cl.wg.Add(1)
-		go w.start()
+		cl.newWorker()
 	}
 }
 

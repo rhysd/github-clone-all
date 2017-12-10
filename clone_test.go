@@ -31,6 +31,12 @@ func testRepos(repos []string, t *testing.T) {
 	}()
 	c.start()
 
+	go func() {
+		for err := range c.err {
+			t.Error("Error reported from cloner:", err)
+		}
+	}()
+
 	for _, r := range repos {
 		c.clone(r)
 	}
