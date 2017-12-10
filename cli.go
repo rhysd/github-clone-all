@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 )
 
 type cli struct {
-	token string
-	query string
-	lang  string
-	dist  string
+	token   string
+	query   string
+	lang    string
+	dist    string
+	extract *regexp.Regexp
 }
 
 func (c *cli) ensureReposDir() error {
@@ -31,12 +33,15 @@ func (c *cli) run() (err error) {
 	if err = c.ensureReposDir(); err != nil {
 		return
 	}
-	col := newCollector(c.query, c.token, c.dist, nil)
+	// TODO: Build query
+	col := newCollector(c.query, c.token, c.dist, c.extract, nil)
 	err = col.collect()
 	return
 }
 
-func newCLI(t, q, l, d string) (*cli, error) {
+func newCLI(t, q, l, d, e string) (*cli, error) {
+	var err error
+
 	env := os.Getenv("GITHUB_TOKEN")
 	if env != "" {
 		t = env
@@ -47,12 +52,19 @@ func newCLI(t, q, l, d string) (*cli, error) {
 	}
 
 	if d == "" {
-		var err error
 		d, err = os.Getwd()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return &cli{t, q, l, d}, nil
+	var r *regexp.Regexp
+	if e != "" {
+		r, err = regexp.Compile(e)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &cli{t, q, l, d, r}, nil
 }

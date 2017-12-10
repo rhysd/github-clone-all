@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewCloner(t *testing.T) {
-	c := newCloner("/path/to/dist")
+	c := newCloner("/path/to/dist", nil)
 	if c.git != "git" {
 		t.Error("Git command should be initialized as 'git' by default:", c.git)
 	}
@@ -16,7 +16,7 @@ func TestNewCloner(t *testing.T) {
 	}
 
 	os.Setenv("GIT_EXECUTABLE_PATH", "/path/to/git")
-	c = newCloner("/path/to/dist")
+	c = newCloner("/path/to/dist", nil)
 	if c.git != "/path/to/git" {
 		t.Error("Git command should respect environment variable $GIT_EXECUTABLE_PATH:", c.git)
 	}
@@ -25,7 +25,7 @@ func TestNewCloner(t *testing.T) {
 }
 
 func testRepos(repos []string, t *testing.T) {
-	c := newCloner("test")
+	c := newCloner("test", nil)
 	defer func() {
 		os.RemoveAll("test")
 	}()

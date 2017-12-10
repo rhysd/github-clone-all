@@ -7,6 +7,7 @@ import (
 	"golang.org/x/oauth2"
 	"log"
 	"math"
+	"regexp"
 	"time"
 )
 
@@ -16,6 +17,7 @@ type collector struct {
 	page    uint
 	query   string
 	dist    string
+	extract *regexp.Regexp
 	client  *github.Client
 	ctx     context.Context
 }
@@ -35,7 +37,7 @@ func (col *collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 }
 
 func (col *collector) collect() error {
-	cloner := newCloner(col.dist)
+	cloner := newCloner(col.dist, col.extract)
 
 	for col.page <= col.maxPage {
 		res, err := col.searchRepos()
@@ -69,13 +71,13 @@ type pageConfig struct {
 
 const pageUnlimited uint = 0
 
-func newCollector(query, token, dist string, page *pageConfig) *collector {
+func newCollector(query, token, dist string, extract *regexp.Regexp, page *pageConfig) *collector {
 	ctx := context.Background()
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 	client := github.NewClient(oauth2.NewClient(ctx, src))
-	c := &collector{100, pageUnlimited, 1, query, dist, client, ctx}
+	c := &collector{100, pageUnlimited, 1, query, dist, extract, client, ctx}
 	if page != nil {
 		c.perPage = page.per
 		c.maxPage = page.max
