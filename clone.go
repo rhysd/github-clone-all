@@ -85,7 +85,7 @@ func (cl *cloner) cloneWith(idx int, repo string) (started bool) {
 
 // Clones the repository in other goroutine
 func (cl *cloner) clone(repo string) {
-	for i, done := range cl.done {
+	for i := range cl.done {
 		if cl.cloneWith(i, repo) {
 			return
 		}
