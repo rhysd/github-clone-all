@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 )
 
@@ -81,4 +82,34 @@ func TestCloneManyRepos(t *testing.T) {
 		"rhysd/vim-color-spring-night",
 	}
 	testRepos(repos, t)
+}
+
+func TestCloneWithExtract(t *testing.T) {
+	re := regexp.MustCompile("\\.vim$")
+	c := newCloner("test", re)
+	defer func() {
+		os.RemoveAll("test")
+	}()
+	c.start()
+
+	go func() {
+		for err := range c.err {
+			t.Error("Error reported from cloner:", err)
+		}
+	}()
+
+	c.clone("rhysd/clever-f.vim")
+	c.shutdown()
+
+	if err := filepath.Walk("test/rhysd/clever-f.vim", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
+		if !info.IsDir() && !re.MatchString(path) {
+			t.Error("File not matching to 'extract' remains:", path)
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 }
