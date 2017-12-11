@@ -94,3 +94,21 @@ func TestMakeDest(t *testing.T) {
 		}
 	}
 }
+
+func TestDestAlreadyExistAsFile(t *testing.T) {
+	defer os.Remove("repos")
+	f, err := os.OpenFile("repos", os.O_RDONLY|os.O_CREATE, 0666)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	cli, err := newCLI("token", "", "lang", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := cli.ensureReposDir(); err == nil {
+		t.Fatal("Error should occur when file is already created")
+	}
+}
