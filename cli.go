@@ -17,7 +17,7 @@ type cli struct {
 func (c *cli) ensureReposDir() error {
 	s, err := os.Stat(c.dest)
 	if err != nil {
-		return os.Mkdir(c.dest, os.ModeDir)
+		return os.Mkdir(c.dest, 0755)
 	}
 	if !s.IsDir() {
 		return fmt.Errorf("Cannot create directory '%s' because it's a file", c.dest)

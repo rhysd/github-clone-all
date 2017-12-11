@@ -88,7 +88,6 @@ type pageConfig struct {
 const pageUnlimited uint = 0
 
 func newCollector(query, token, dest string, extract *regexp.Regexp, page *pageConfig) *collector {
-	println("TOKEN:", token)
 	ctx := context.Background()
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
