@@ -20,6 +20,7 @@ type cloner struct {
 	repos   chan string
 	err     chan error
 	wg      sync.WaitGroup
+	ssh     bool
 }
 
 func newCloner(dest string, extract *regexp.Regexp) *cloner {
@@ -57,7 +58,13 @@ func (cl *cloner) newWorker() {
 		for repo := range cl.repos {
 			log.Println("Cloning", repo)
 
-			url := fmt.Sprintf("https://github.com/%s.git", repo)
+			var url string
+			if cl.ssh {
+				url = fmt.Sprintf("git@github.com:%s.git", repo)
+			} else {
+				url = fmt.Sprintf("https://github.com/%s.git", repo)
+			}
+
 			dir := filepath.FromSlash(fmt.Sprintf("%s/%s", dest, repo))
 			cmd := exec.Command(git, "clone", "--depth=1", "--single-branch", url, dir)
 			err := cmd.Run()

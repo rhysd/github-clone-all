@@ -113,3 +113,22 @@ func TestCloneWithExtract(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestCloneNotExistingRepo(t *testing.T) {
+	c := newCloner("test", nil)
+	c.ssh = true
+	c.err = make(chan error, 10) // Buffer errors to make test easier
+	c.start()
+
+	c.clone("rhysd/not-existing-repository")
+	c.shutdown()
+
+	select {
+	case err, ok := <-c.err:
+		if !ok || err == nil {
+			t.Fatal("Error not reported")
+		}
+	default:
+		t.Fatal("Error not reported")
+	}
+}
