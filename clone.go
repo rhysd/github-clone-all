@@ -76,7 +76,7 @@ func (cl *cloner) newWorker() {
 					if info.IsDir() {
 						return nil
 					}
-					if extract.MatchString(path) {
+					if !extract.MatchString(path) {
 						if err := os.Remove(path); err != nil {
 							return err
 						}
