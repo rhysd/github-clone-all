@@ -10,19 +10,19 @@ import (
 type cli struct {
 	token   string
 	query   string
-	dist    string
+	dest    string
 	extract *regexp.Regexp // Maybe nil
 }
 
 func (c *cli) ensureReposDir() error {
-	s, err := os.Stat(c.dist)
+	s, err := os.Stat(c.dest)
 	if err != nil {
-		if err := os.Mkdir(c.dist, os.ModeDir); err != nil {
+		if err := os.Mkdir(c.dest, os.ModeDir); err != nil {
 			return err
 		}
 	}
 	if !s.IsDir() {
-		return fmt.Errorf("Cannot create directory '%s' because it's a file", c.dist)
+		return fmt.Errorf("Cannot create directory '%s' because it's a file", c.dest)
 	}
 	return nil
 }
@@ -31,7 +31,7 @@ func (c *cli) run() (err error) {
 	if err = c.ensureReposDir(); err != nil {
 		return
 	}
-	col := newCollector(c.query, c.token, c.dist, c.extract, nil)
+	col := newCollector(c.query, c.token, c.dest, c.extract, nil)
 	_, _, err = col.collect()
 	return
 }
@@ -39,7 +39,7 @@ func (c *cli) run() (err error) {
 func newCLI(t, q, l, d, e string) (*cli, error) {
 	var err error
 
-	if env := os.Getenv("GITHUB_TOKEN"); env != "" {
+	if env := os.Getenv("GITHUB_TOKEN"); env != "" && t == "" {
 		t = env
 	}
 

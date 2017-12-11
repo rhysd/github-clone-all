@@ -15,17 +15,17 @@ const maxBuffer = 1000
 
 type cloner struct {
 	git     string
-	dist    string
+	dest    string
 	extract *regexp.Regexp
 	repos   chan string
 	err     chan error
 	wg      sync.WaitGroup
 }
 
-func newCloner(dist string, extract *regexp.Regexp) *cloner {
+func newCloner(dest string, extract *regexp.Regexp) *cloner {
 	c := &cloner{
 		git:     os.Getenv("GIT_EXECUTABLE_PATH"),
-		dist:    dist,
+		dest:    dest,
 		extract: extract,
 		repos:   make(chan string, maxBuffer),
 		err:     make(chan error),
@@ -44,7 +44,7 @@ func (cl *cloner) clone(repo string) {
 
 func (cl *cloner) newWorker() {
 	cl.wg.Add(1)
-	dist := cl.dist
+	dest := cl.dest
 	git := cl.git
 
 	var extract *regexp.Regexp
@@ -58,7 +58,7 @@ func (cl *cloner) newWorker() {
 			log.Println("Cloning", repo)
 
 			url := fmt.Sprintf("https://github.com/%s.git", repo)
-			dir := filepath.FromSlash(fmt.Sprintf("%s/%s", dist, repo))
+			dir := filepath.FromSlash(fmt.Sprintf("%s/%s", dest, repo))
 			cmd := exec.Command(git, "clone", "--depth=1", "--single-branch", url, dir)
 			err := cmd.Run()
 

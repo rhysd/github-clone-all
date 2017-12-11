@@ -16,7 +16,7 @@ type collector struct {
 	maxPage uint
 	page    uint
 	query   string
-	dist    string
+	dest    string
 	extract *regexp.Regexp
 	client  *github.Client
 	ctx     context.Context
@@ -38,7 +38,7 @@ func (col *collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 
 func (col *collector) collect() (int, int, error) {
 	log.Println("Searching GitHub repositories with query:", col.query)
-	cloner := newCloner(col.dist, col.extract)
+	cloner := newCloner(col.dest, col.extract)
 	cloner.start()
 
 	total := 0
@@ -74,7 +74,7 @@ func (col *collector) collect() (int, int, error) {
 
 	cloner.shutdown()
 
-	log.Println(count, "repositories were cloned into", col.dist, "for total", total, "search results")
+	log.Println(count, "repositories were cloned into", col.dest, "for total", total, "search results")
 
 	return count, total, nil
 }
@@ -87,13 +87,14 @@ type pageConfig struct {
 
 const pageUnlimited uint = 0
 
-func newCollector(query, token, dist string, extract *regexp.Regexp, page *pageConfig) *collector {
+func newCollector(query, token, dest string, extract *regexp.Regexp, page *pageConfig) *collector {
+	println("TOKEN:", token)
 	ctx := context.Background()
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 	client := github.NewClient(oauth2.NewClient(ctx, src))
-	c := &collector{100, pageUnlimited, 1, query, dist, extract, client, ctx}
+	c := &collector{100, pageUnlimited, 1, query, dest, extract, client, ctx}
 	if page != nil {
 		c.perPage = page.per
 		c.maxPage = page.max

@@ -7,16 +7,16 @@ import (
 )
 
 func TestNewCloner(t *testing.T) {
-	c := newCloner("/path/to/dist", nil)
+	c := newCloner("/path/to/dest", nil)
 	if c.git != "git" {
 		t.Error("Git command should be initialized as 'git' by default:", c.git)
 	}
-	if c.dist != "/path/to/dist" {
-		t.Error("Distination to clone should be set to given path:", c.dist)
+	if c.dest != "/path/to/dest" {
+		t.Error("Distination to clone should be set to given path:", c.dest)
 	}
 
 	os.Setenv("GIT_EXECUTABLE_PATH", "/path/to/git")
-	c = newCloner("/path/to/dist", nil)
+	c = newCloner("/path/to/dest", nil)
 	if c.git != "/path/to/git" {
 		t.Error("Git command should respect environment variable $GIT_EXECUTABLE_PATH:", c.git)
 	}
