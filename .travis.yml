@@ -1,0 +1,17 @@
+language: go
+os:
+  - linux
+  - osx
+install:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew update
+      export HOMEBREW_NO_AUTO_UPDATE=1
+      brew upgrade go
+      go version
+    fi
+  - go get -t -d -v ./...
+script:
+  - go test -v -race -coverprofile=coverage.txt
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
