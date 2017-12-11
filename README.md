@@ -1,8 +1,8 @@
-Clone all matching repos on GitHub
-==================================
+Clone matching repos on GitHub
+==============================
 
-`github-clone-all` is a command to clone all repositories matching to given query and language
-via [GitHub Search API][]
+`github-clone-all` is a small command to clone all repositories matching to given query and
+language via [GitHub Search API][].
 It clones many repositories in parallel. Please see `-help` option to know all flags.
 
 Query is the same as GitHub search syntax. And 'stars>1 fork:false' is added by default for
@@ -18,7 +18,7 @@ gain GitHub API token in advance. `github-clone-all` will refer the token via `-
 
 ## Installation
 
-Use `go get` or released binaries (not yet).
+Use `go get` or [released binaries](https://github.com/rhysd/github-clone-all/releases).
 
 ```
 $ go get github.com/rhysd/github-clone-all
