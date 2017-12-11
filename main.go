@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 )
 
@@ -52,6 +54,7 @@ func main() {
 	lang := flag.String("lang", "", "Language name to search repos (required)")
 	dest := flag.String("dest", "", "Directory to store the downloaded files. By default 'repos' in current working directory (optional)")
 	extract := flag.String("extract", "", "Regular expression to extract files in each cloned repo (optional)")
+	quiet := flag.Bool("quiet", false, "Run quietly. Exit status is non-zero, it means error occurred (optional)")
 
 	flag.Usage = usage
 	flag.Parse()
@@ -59,6 +62,10 @@ func main() {
 	if *help || *h {
 		usage()
 		os.Exit(0)
+	}
+
+	if *quiet {
+		log.SetOutput(ioutil.Discard)
 	}
 
 	cli, err := newCLI(*token, *query, *lang, *dest, *extract)
