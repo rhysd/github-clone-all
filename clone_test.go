@@ -118,11 +118,10 @@ func TestCloneWithExtract(t *testing.T) {
 
 func TestCloneNotExistingRepo(t *testing.T) {
 	c := newCloner("test", nil)
-	c.ssh = true
 	c.err = make(chan error, 10)
 	c.start()
 
-	c.clone("rhysd/not-existing-repository")
+	c.clone("")
 	c.shutdown()
 
 	select {
