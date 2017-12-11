@@ -69,3 +69,28 @@ func TestInvalidRegexp(t *testing.T) {
 	}
 
 }
+
+func TestMakeDest(t *testing.T) {
+	defer os.Remove("repos")
+
+	cli, err := newCLI("token", "", "lang", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// If directory is already existing, it does nothing. First create the directory
+	// and at second check the case where directory is already existing.
+	for i := 0; i < 2; i++ {
+		if err := cli.ensureReposDir(); err != nil {
+			t.Fatal(err)
+		}
+
+		s, err := os.Stat("repos")
+		if err != nil {
+			t.Fatal("'repos' directory was not created")
+		}
+		if !s.IsDir() {
+			t.Fatal("Created entry is not a directory")
+		}
+	}
+}
