@@ -65,7 +65,6 @@ func (col *collector) collect() (int, int, error) {
 		}
 
 		for _, repo := range res.Repositories {
-			fmt.Printf("%s/%s\n", repo.GetOwner().GetLogin(), repo.GetName())
 			cloner.clone(fmt.Sprintf("%s/%s", repo.GetOwner().GetLogin(), repo.GetName()))
 			count++
 		}

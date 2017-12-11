@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -30,7 +31,8 @@ func TestEmptyDist(t *testing.T) {
 		t.Fatal(err)
 	}
 	cwd, _ := os.Getwd()
-	if cli.dist != cwd {
+	d := filepath.Join(cwd, "repos")
+	if cli.dist != d {
 		t.Error("Empty dist should mean current working directory but:", cli.dist)
 	}
 }

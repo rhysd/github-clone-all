@@ -15,15 +15,14 @@ type cli struct {
 }
 
 func (c *cli) ensureReposDir() error {
-	dir := filepath.Join(c.dist, "repos")
-	s, err := os.Stat(dir)
+	s, err := os.Stat(c.dist)
 	if err != nil {
-		if err := os.Mkdir(dir, os.ModeDir); err != nil {
+		if err := os.Mkdir(c.dist, os.ModeDir); err != nil {
 			return err
 		}
 	}
 	if !s.IsDir() {
-		return fmt.Errorf("Cannot create directory '%s' because it's a file", dir)
+		return fmt.Errorf("Cannot create directory '%s' because it's a file", c.dist)
 	}
 	return nil
 }
@@ -53,6 +52,7 @@ func newCLI(t, q, l, d, e string) (*cli, error) {
 		if err != nil {
 			return nil, err
 		}
+		d = filepath.Join(d, "repos")
 	}
 
 	var r *regexp.Regexp
