@@ -45,6 +45,7 @@ func usage() {
 
 func main() {
 	help := flag.Bool("help", false, "Show this help")
+	h := flag.Bool("h", false, "Show this help")
 	token := flag.String("token", "", "GitHub token to call GitHub API. $GITHUB_TOKEN environment variable is also referred (required)")
 	query := flag.String("query", "", "Additional query string to search (optional)")
 	lang := flag.String("lang", "", "Language name to search repos (required)")
@@ -54,7 +55,7 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	if *help {
+	if *help || *h {
 		usage()
 		os.Exit(0)
 	}
