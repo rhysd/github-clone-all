@@ -39,8 +39,14 @@ func (col *collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 func (col *collector) collect() (int, int, error) {
 	log.Println("Searching GitHub repositories with query:", col.query)
 	cloner := newCloner(col.dest, col.extract)
-	cloner.start()
+	go func() {
+		for range cloner.err {
+			// Do nothing because error is already reported in cloner
+			// Error is reported in cloner because cloner can show more descriptive error message
+		}
+	}()
 
+	cloner.start()
 	total := 0
 	count := 0
 	for col.page <= col.maxPage {
@@ -75,15 +81,6 @@ func (col *collector) collect() (int, int, error) {
 	cloner.shutdown()
 
 	log.Println(count, "repositories were cloned into", col.dest, "for total", total, "search results")
-
-	select {
-	case err, ok := <-cloner.err:
-		if ok {
-			return 0, 0, err
-		}
-	default:
-		// Do nothing
-	}
 
 	return count, total, nil
 }

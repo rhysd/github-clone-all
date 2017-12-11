@@ -72,7 +72,7 @@ func (cl *cloner) newWorker() {
 			if err != nil {
 				log.Println("Failed to clone", repo, err)
 				cl.err <- err
-				return
+				continue
 			}
 
 			if extract != nil {
@@ -110,4 +110,5 @@ func (cl *cloner) start() {
 func (cl *cloner) shutdown() {
 	close(cl.repos)
 	cl.wg.Wait()
+	close(cl.err)
 }
