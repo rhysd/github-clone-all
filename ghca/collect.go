@@ -1,4 +1,4 @@
-package main
+package ghca
 
 import (
 	"context"
@@ -11,35 +11,35 @@ import (
 	"time"
 )
 
-type collector struct {
+type Collector struct {
 	perPage uint
 	maxPage uint
 	page    uint
-	query   string
-	dest    string
-	extract *regexp.Regexp
+	Query   string
+	Dest    string
+	Extract *regexp.Regexp
 	client  *github.Client
 	ctx     context.Context
 }
 
-func (col *collector) searchRepos() (*github.RepositoriesSearchResult, error) {
+func (col *Collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 	o := &github.SearchOptions{
 		ListOptions: github.ListOptions{
 			Page:    int(col.page),
 			PerPage: int(col.perPage),
 		},
 	}
-	r, _, err := col.client.Search.Repositories(col.ctx, col.query, o)
+	r, _, err := col.client.Search.Repositories(col.ctx, col.Query, o)
 	if err != nil {
 		return nil, err
 	}
 	return r, nil
 }
 
-func (col *collector) collect() (int, int, error) {
-	log.Println("Searching GitHub repositories with query:", col.query)
-	cloner := newCloner(col.dest, col.extract)
-	cloner.start()
+func (col *Collector) Collect() (int, int, error) {
+	log.Println("Searching GitHub repositories with query:", col.Query)
+	cloner := NewCloner(col.Dest, col.Extract)
+	cloner.Start()
 
 	total := 0
 	count := 0
@@ -65,41 +65,41 @@ func (col *collector) collect() (int, int, error) {
 		}
 
 		for _, repo := range res.Repositories {
-			cloner.clone(fmt.Sprintf("%s/%s", repo.GetOwner().GetLogin(), repo.GetName()))
+			cloner.Clone(fmt.Sprintf("%s/%s", repo.GetOwner().GetLogin(), repo.GetName()))
 			count++
 		}
 
 		col.page++
 	}
 
-	cloner.shutdown()
+	cloner.Shutdown()
 
-	log.Println(count, "repositories were cloned into", col.dest, "for total", total, "search results")
+	log.Println(count, "repositories were cloned into", col.Dest, "for total", total, "search results")
 
 	return count, total, nil
 }
 
-type pageConfig struct {
-	per   uint
-	max   uint
-	start uint
+type PageConfig struct {
+	Per   uint
+	Max   uint
+	Start uint
 }
 
-const pageUnlimited uint = 0
+const PageUnlimited uint = 0
 
-func newCollector(query, token, dest string, extract *regexp.Regexp, page *pageConfig) *collector {
+func NewCollector(query, token, dest string, extract *regexp.Regexp, page *PageConfig) *Collector {
 	ctx := context.Background()
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 	client := github.NewClient(oauth2.NewClient(ctx, src))
-	c := &collector{100, pageUnlimited, 1, query, dest, extract, client, ctx}
+	c := &Collector{100, PageUnlimited, 1, query, dest, extract, client, ctx}
 	if page != nil {
-		c.perPage = page.per
-		c.maxPage = page.max
-		c.page = page.start
+		c.perPage = page.Per
+		c.maxPage = page.Max
+		c.page = page.Start
 	}
-	if c.maxPage == pageUnlimited {
+	if c.maxPage == PageUnlimited {
 		c.maxPage = uint(math.Ceil(1000.0 / float64(c.perPage)))
 	}
 	return c

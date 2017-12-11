@@ -1,4 +1,4 @@
-package main
+package ghca
 
 import (
 	"io"
@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewCollector(t *testing.T) {
-	c := newCollector("foo", "", "", nil, nil)
+	c := NewCollector("foo", "", "", nil, nil)
 	if c.perPage != 100 {
 		t.Error("perPage should be 100 by default:", c.perPage)
 	}
@@ -18,13 +18,13 @@ func TestNewCollector(t *testing.T) {
 	if c.page != 1 {
 		t.Error("page should be 1 by default:", c.page)
 	}
-	if c.query != "foo" {
-		t.Error("query should be set to 'foo'", c.query)
+	if c.Query != "foo" {
+		t.Error("query should be set to 'foo'", c.Query)
 	}
 }
 
 func TestNewCollectorWithConfig(t *testing.T) {
-	c := newCollector("foo", "", "", nil, &pageConfig{1, 10, 3})
+	c := NewCollector("foo", "", "", nil, &PageConfig{1, 10, 3})
 	if c.perPage != 1 {
 		t.Error("perPage should be set to 1:", c.perPage)
 	}
@@ -35,7 +35,7 @@ func TestNewCollectorWithConfig(t *testing.T) {
 		t.Error("page should be set to 3:", c.page)
 	}
 
-	c = newCollector("foo", "", "", nil, &pageConfig{3, pageUnlimited, 3})
+	c = NewCollector("foo", "", "", nil, &PageConfig{3, PageUnlimited, 3})
 	if c.maxPage != 334 {
 		t.Error("maxPage should be calculated to fetch 1000 repos:", c.maxPage)
 	}
@@ -51,8 +51,8 @@ func TestCollectReposTotalIsAFew(t *testing.T) {
 		os.RemoveAll("test")
 	}()
 
-	c := newCollector("clever-f.vim language:vim fork:false", token, "test", nil, nil)
-	count, total, err := c.collect()
+	c := NewCollector("clever-f.vim language:vim fork:false", token, "test", nil, nil)
+	count, total, err := c.Collect()
 	if err != nil {
 		t.Fatal("Failed to collect", err)
 	}
@@ -82,13 +82,13 @@ func TestCollectReposTotalIsLarge(t *testing.T) {
 	}()
 
 	// Get page 4, 5, 6 and each page results in 2 repos
-	c := newCollector("language:vim fork:false", token, "test", nil, &pageConfig{
-		per:   2,
-		max:   6,
-		start: 4,
+	c := NewCollector("language:vim fork:false", token, "test", nil, &PageConfig{
+		Per:   2,
+		Max:   6,
+		Start: 4,
 	})
 
-	count, total, err := c.collect()
+	count, total, err := c.Collect()
 	if err != nil {
 		t.Fatal("Failed to collect", err)
 	}

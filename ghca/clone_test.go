@@ -1,4 +1,4 @@
-package main
+package ghca
 
 import (
 	"os"
@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewCloner(t *testing.T) {
-	c := newCloner("/path/to/dest", nil)
+	c := NewCloner("/path/to/dest", nil)
 	if c.git != "git" {
 		t.Error("Git command should be initialized as 'git' by default:", c.git)
 	}
@@ -17,7 +17,7 @@ func TestNewCloner(t *testing.T) {
 	}
 
 	os.Setenv("GIT_EXECUTABLE_PATH", "/path/to/git")
-	c = newCloner("/path/to/dest", nil)
+	c = NewCloner("/path/to/dest", nil)
 	if c.git != "/path/to/git" {
 		t.Error("Git command should respect environment variable $GIT_EXECUTABLE_PATH:", c.git)
 	}
@@ -26,23 +26,23 @@ func TestNewCloner(t *testing.T) {
 }
 
 func testRepos(repos []string, t *testing.T) {
-	c := newCloner("test", nil)
+	c := NewCloner("test", nil)
 	defer func() {
 		os.RemoveAll("test")
 	}()
-	c.err = make(chan error, 10)
-	c.start()
+	c.Err = make(chan error, 10)
+	c.Start()
 
 	go func() {
-		for err := range c.err {
+		for err := range c.Err {
 			t.Error("Error reported from cloner:", err)
 		}
 	}()
 
 	for _, r := range repos {
-		c.clone(r)
+		c.Clone(r)
 	}
-	c.shutdown()
+	c.Shutdown()
 
 	for _, r := range repos {
 		p := filepath.FromSlash("test/" + r)
@@ -87,21 +87,21 @@ func TestCloneManyRepos(t *testing.T) {
 
 func TestCloneWithExtract(t *testing.T) {
 	re := regexp.MustCompile("\\.vim$")
-	c := newCloner("test", re)
+	c := NewCloner("test", re)
 	defer func() {
 		os.RemoveAll("test")
 	}()
-	c.err = make(chan error, 10)
-	c.start()
+	c.Err = make(chan error, 10)
+	c.Start()
 
 	go func() {
-		for err := range c.err {
+		for err := range c.Err {
 			t.Error("Error reported from cloner:", err)
 		}
 	}()
 
-	c.clone("rhysd/clever-f.vim")
-	c.shutdown()
+	c.Clone("rhysd/clever-f.vim")
+	c.Shutdown()
 
 	if err := filepath.Walk("test/rhysd/clever-f.vim", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -117,15 +117,15 @@ func TestCloneWithExtract(t *testing.T) {
 }
 
 func TestCloneNotExistingRepo(t *testing.T) {
-	c := newCloner("test", nil)
-	c.err = make(chan error, 10)
-	c.start()
+	c := NewCloner("test", nil)
+	c.Err = make(chan error, 10)
+	c.Start()
 
-	c.clone("")
-	c.shutdown()
+	c.Clone("")
+	c.Shutdown()
 
 	select {
-	case err, ok := <-c.err:
+	case err, ok := <-c.Err:
 		if !ok || err == nil {
 			t.Fatal("Error not reported")
 		}

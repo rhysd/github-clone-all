@@ -1,4 +1,4 @@
-package main
+package ghca
 
 import (
 	"fmt"
@@ -13,18 +13,18 @@ import (
 const maxConcurrency = 4
 const maxBuffer = 1000
 
-type cloner struct {
+type Cloner struct {
 	git     string
 	dest    string
 	extract *regexp.Regexp
 	repos   chan string
-	err     chan error
+	Err     chan error
 	wg      sync.WaitGroup
-	ssh     bool
+	SSH     bool
 }
 
-func newCloner(dest string, extract *regexp.Regexp) *cloner {
-	c := &cloner{
+func NewCloner(dest string, extract *regexp.Regexp) *Cloner {
+	c := &Cloner{
 		git:     os.Getenv("GIT_EXECUTABLE_PATH"),
 		dest:    dest,
 		extract: extract,
@@ -38,11 +38,11 @@ func newCloner(dest string, extract *regexp.Regexp) *cloner {
 	return c
 }
 
-func (cl *cloner) clone(repo string) {
+func (cl *Cloner) Clone(repo string) {
 	cl.repos <- repo
 }
 
-func (cl *cloner) newWorker() {
+func (cl *Cloner) newWorker() {
 	cl.wg.Add(1)
 	dest := cl.dest
 	git := cl.git
@@ -58,7 +58,7 @@ func (cl *cloner) newWorker() {
 			log.Println("Cloning", repo)
 
 			var url string
-			if cl.ssh {
+			if cl.SSH {
 				url = fmt.Sprintf("git@github.com:%s.git", repo)
 			} else {
 				url = fmt.Sprintf("https://github.com/%s.git", repo)
@@ -70,8 +70,8 @@ func (cl *cloner) newWorker() {
 
 			if err != nil {
 				log.Println("Failed to clone", repo, err)
-				if cl.err != nil {
-					cl.err <- err
+				if cl.Err != nil {
+					cl.Err <- err
 				}
 				continue
 			}
@@ -92,8 +92,8 @@ func (cl *cloner) newWorker() {
 					return nil
 				}); err != nil {
 					log.Println("Failed to extract files", repo, extract.String(), err)
-					if cl.err != nil {
-						cl.err <- err
+					if cl.Err != nil {
+						cl.Err <- err
 					}
 					return
 				}
@@ -104,16 +104,16 @@ func (cl *cloner) newWorker() {
 	}()
 }
 
-func (cl *cloner) start() {
+func (cl *Cloner) Start() {
 	for i := 0; i < maxConcurrency; i++ {
 		cl.newWorker()
 	}
 }
 
-func (cl *cloner) shutdown() {
+func (cl *Cloner) Shutdown() {
 	close(cl.repos)
 	cl.wg.Wait()
-	if cl.err != nil {
-		close(cl.err)
+	if cl.Err != nil {
+		close(cl.Err)
 	}
 }

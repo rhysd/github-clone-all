@@ -8,6 +8,6 @@ install:
   - go env
 script:
   - go build
-  - go test -v -race -coverprofile=coverage.txt
+  - go test -v -race -coverprofile=coverage.txt ./ghca
 after_success:
   - bash <(curl -s https://codecov.io/bash)

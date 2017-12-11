@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/rhysd/github-clone-all/ghca"
 	"io/ioutil"
 	"log"
 	"os"
@@ -68,12 +69,12 @@ func main() {
 		log.SetOutput(ioutil.Discard)
 	}
 
-	cli, err := newCLI(*token, *query, *lang, *dest, *extract)
+	cli, err := ghca.NewCLI(*token, *query, *lang, *dest, *extract)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(3)
 	}
-	if err = cli.run(); err != nil {
+	if err = cli.Run(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(3)
 	}

@@ -1,4 +1,4 @@
-package main
+package ghca
 
 import (
 	"fmt"
@@ -7,14 +7,14 @@ import (
 	"regexp"
 )
 
-type cli struct {
+type CLI struct {
 	token   string
 	query   string
 	dest    string
 	extract *regexp.Regexp // Maybe nil
 }
 
-func (c *cli) ensureReposDir() error {
+func (c *CLI) ensureReposDir() error {
 	s, err := os.Stat(c.dest)
 	if err != nil {
 		return os.Mkdir(c.dest, 0755)
@@ -25,16 +25,16 @@ func (c *cli) ensureReposDir() error {
 	return nil
 }
 
-func (c *cli) run() (err error) {
+func (c *CLI) Run() (err error) {
 	if err = c.ensureReposDir(); err != nil {
 		return
 	}
-	col := newCollector(c.query, c.token, c.dest, c.extract, nil)
-	_, _, err = col.collect()
+	col := NewCollector(c.query, c.token, c.dest, c.extract, nil)
+	_, _, err = col.Collect()
 	return
 }
 
-func newCLI(t, q, l, d, e string) (*cli, error) {
+func NewCLI(t, q, l, d, e string) (*CLI, error) {
 	var err error
 
 	if env := os.Getenv("GITHUB_TOKEN"); env != "" && t == "" {
@@ -62,5 +62,5 @@ func newCLI(t, q, l, d, e string) (*cli, error) {
 	}
 
 	q = fmt.Sprintf("%s language:%s fork:false", q, l)
-	return &cli{t, q, d, r}, nil
+	return &CLI{t, q, d, r}, nil
 }

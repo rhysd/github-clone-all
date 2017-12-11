@@ -12,7 +12,7 @@ install:
 build: off
 test_script:
     - go build
-    - go test -v -race -coverprofile=coverage.txt
+    - go test -v -race -coverprofile=coverage.txt ./ghca
 after_test:
     - "SET PATH=C:\\Python34;C:\\Python34\\Scripts;%PATH%"
     - pip install codecov
