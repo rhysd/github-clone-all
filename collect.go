@@ -76,6 +76,15 @@ func (col *collector) collect() (int, int, error) {
 
 	log.Println(count, "repositories were cloned into", col.dest, "for total", total, "search results")
 
+	select {
+	case err, ok := <-cloner.err:
+		if ok {
+			return 0, 0, err
+		}
+	default:
+		// Do nothing
+	}
+
 	return count, total, nil
 }
 
