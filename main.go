@@ -9,7 +9,8 @@ import (
 const usageHeader = `Usage: github-clone-all {Flags}
 
   github-clone-all is a command to clone all repositories matching to given
-  query and language. It clones many repositories parallely.
+  query and language via GitHub Search API.
+  It clones many repositories in parallel.
 
   Query is the same as GitHub search syntax. And 'stars>1 fork:false' is
   added by default for sensible search results.
