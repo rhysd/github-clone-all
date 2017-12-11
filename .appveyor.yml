@@ -11,6 +11,7 @@ install:
     - go get -v -t -d ./...
 build: off
 test_script:
+    - go build
     - go test -v -race -coverprofile=coverage.txt
 after_test:
     - "SET PATH=C:\\Python34;C:\\Python34\\Scripts;%PATH%"
