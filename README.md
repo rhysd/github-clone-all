@@ -11,7 +11,7 @@ It clones many repositories in parallel. Please see `-help` option to know all f
 Query is the same as GitHub search syntax. And 'stars>1 fork:false' is added by default for
 sensible search results.
 
-Repository is cloned to 'dest' directory. It is $cwd/repos by default and can be specified with
+Repository is cloned to 'dest' directory. It is `$cwd/repos` by default and can be specified with
 `-dest` flag. And in order to reduce size of cloned repositories, `-extract` option is available.
 `-extract` only leaves files matching to given regular expression.
 
@@ -43,6 +43,15 @@ working directory.
 3. Add token description
 4. Without checking any checkbox, click 'Generate token'
 5. Key is shown in your tokens list
+
+## Use github-clone-all programmatically
+
+`github-clone-all` consists of tiny `main.go` and `ghca` package. You can import `ghca` to utilize
+functions of the tool.
+
+```go
+import "github.com/rhysd/github-clone-all/ghca"
+```
 
 ## License
 
