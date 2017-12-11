@@ -29,7 +29,6 @@ func newCloner(dest string, extract *regexp.Regexp) *cloner {
 		dest:    dest,
 		extract: extract,
 		repos:   make(chan string, maxBuffer),
-		err:     make(chan error),
 	}
 
 	if c.git == "" {
@@ -71,7 +70,9 @@ func (cl *cloner) newWorker() {
 
 			if err != nil {
 				log.Println("Failed to clone", repo, err)
-				cl.err <- err
+				if cl.err != nil {
+					cl.err <- err
+				}
 				continue
 			}
 
@@ -91,7 +92,9 @@ func (cl *cloner) newWorker() {
 					return nil
 				}); err != nil {
 					log.Println("Failed to extract files", repo, extract.String(), err)
-					cl.err <- err
+					if cl.err != nil {
+						cl.err <- err
+					}
 					return
 				}
 			}
@@ -110,5 +113,7 @@ func (cl *cloner) start() {
 func (cl *cloner) shutdown() {
 	close(cl.repos)
 	cl.wg.Wait()
-	close(cl.err)
+	if cl.err != nil {
+		close(cl.err)
+	}
 }

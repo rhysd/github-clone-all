@@ -30,6 +30,7 @@ func testRepos(repos []string, t *testing.T) {
 	defer func() {
 		os.RemoveAll("test")
 	}()
+	c.err = make(chan error, 10)
 	c.start()
 
 	go func() {
@@ -90,6 +91,7 @@ func TestCloneWithExtract(t *testing.T) {
 	defer func() {
 		os.RemoveAll("test")
 	}()
+	c.err = make(chan error, 10)
 	c.start()
 
 	go func() {
@@ -117,7 +119,7 @@ func TestCloneWithExtract(t *testing.T) {
 func TestCloneNotExistingRepo(t *testing.T) {
 	c := newCloner("test", nil)
 	c.ssh = true
-	c.err = make(chan error, 10) // Buffer errors to make test easier
+	c.err = make(chan error, 10)
 	c.start()
 
 	c.clone("rhysd/not-existing-repository")
