@@ -33,7 +33,7 @@ func (c *cli) run() (err error) {
 		return
 	}
 	col := newCollector(c.query, c.token, c.dist, c.extract, nil)
-	err = col.collect()
+	_, _, err = col.collect()
 	return
 }
 

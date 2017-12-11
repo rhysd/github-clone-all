@@ -1,7 +1,9 @@
 package main
 
 import (
+	"io"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -39,8 +41,69 @@ func TestNewCollectorWithConfig(t *testing.T) {
 	}
 }
 
-func TestCollectRepos(t *testing.T) {
-	if os.Getenv("GITHUB_TOKEN") == "" {
+func TestCollectReposTotalIsAFew(t *testing.T) {
+	token := os.Getenv("GITHUB_TOKEN")
+	if token == "" {
 		t.Skip("Skipping because API token not found")
+	}
+
+	defer func() {
+		os.RemoveAll("test")
+	}()
+
+	c := newCollector("clever-f.vim language:vim fork:false", token, "test", nil, nil)
+	count, total, err := c.collect()
+	if err != nil {
+		t.Fatal("Failed to collect", err)
+	}
+	if total < 2 || count < 2 {
+		t.Fatal("Total repositories is too few:", total)
+	}
+
+	for _, dir := range []string{
+		"test/rhysd/clever-f.vim",
+		"test/vim-scripts/clever-f.vim",
+	} {
+		dir = filepath.FromSlash(dir)
+		if _, err := os.Stat(dir); err != nil {
+			t.Fatal(dir, "was not cloned")
+		}
+	}
+}
+
+func TestCollectReposTotalIsLarge(t *testing.T) {
+	token := os.Getenv("GITHUB_TOKEN")
+	if token == "" {
+		t.Skip("Skipping because API token not found")
+	}
+
+	defer func() {
+		os.RemoveAll("test")
+	}()
+
+	// Get page 4, 5, 6 and each page results in 2 repos
+	c := newCollector("language:vim fork:false", token, "test", nil, &pageConfig{
+		per:   2,
+		max:   6,
+		start: 4,
+	})
+
+	count, total, err := c.collect()
+	if err != nil {
+		t.Fatal("Failed to collect", err)
+	}
+	if total == 0 {
+		t.Fatal("No repository was found")
+	}
+	if count != 6 {
+		t.Fatal("6 repositories (2x3) should be resulted:", total)
+	}
+
+	dir, err := os.Open("test")
+	if err != nil {
+		t.Fatal("Failed to open", err)
+	}
+	if _, err := dir.Readdirnames(1); err == io.EOF {
+		t.Fatal("'test' directory is empty")
 	}
 }

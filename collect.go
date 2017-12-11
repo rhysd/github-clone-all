@@ -36,24 +36,38 @@ func (col *collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 	return r, nil
 }
 
-func (col *collector) collect() error {
-	log.Println("Search GitHub repositories with query:", col.query)
+func (col *collector) collect() (int, int, error) {
+	log.Println("Searching GitHub repositories with query:", col.query)
 	cloner := newCloner(col.dist, col.extract)
+	cloner.start()
 
+	total := 0
+	count := 0
 	for col.page <= col.maxPage {
 		res, err := col.searchRepos()
 		if _, ok := err.(*github.RateLimitError); ok {
+			log.Println("Rate limit exceeded. Sleeping 1 minute")
 			time.Sleep(1 * time.Minute)
 			continue
 		} else if err != nil {
-			return err
+			return 0, 0, err
 		}
+
+		total = res.GetTotal()
+
 		if res.GetIncompleteResults() {
 			log.Println("TODO: Handle incomplete result returned from GitHub API")
 		}
 
+		if len(res.Repositories) == 0 {
+			// All repositories were searched
+			break
+		}
+
 		for _, repo := range res.Repositories {
-			cloner.clone(fmt.Sprintf("%s/%s", repo.GetName(), repo.GetOwner().GetLogin()))
+			fmt.Printf("%s/%s\n", repo.GetOwner().GetLogin(), repo.GetName())
+			cloner.clone(fmt.Sprintf("%s/%s", repo.GetOwner().GetLogin(), repo.GetName()))
+			count++
 		}
 
 		col.page++
@@ -61,7 +75,9 @@ func (col *collector) collect() error {
 
 	cloner.shutdown()
 
-	return nil
+	log.Println(count, "repositories were cloned into", col.dist, "for total", total, "search results")
+
+	return count, total, nil
 }
 
 type pageConfig struct {
@@ -84,7 +100,7 @@ func newCollector(query, token, dist string, extract *regexp.Regexp, page *pageC
 		c.maxPage = page.max
 		c.page = page.start
 	}
-	if c.maxPage == 0 {
+	if c.maxPage == pageUnlimited {
 		c.maxPage = uint(math.Ceil(1000.0 / float64(c.perPage)))
 	}
 	return c
