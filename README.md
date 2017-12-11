@@ -1,6 +1,7 @@
 Clone matching repos on GitHub
 ==============================
-[![Travis Build Status][]][Travis CI]
+[![Mac and Linux Build Status][]][Travis CI]
+[![Windows Build Status][]][Appveyor]
 
 `github-clone-all` is a small command to clone all repositories matching to given query and
 language via [GitHub Search API][].
@@ -47,5 +48,7 @@ working directory.
 [MIT license](LICENSE)
 
 [GitHub Search API]: https://developer.github.com/v3/search/
-[Travis Build Status]: https://travis-ci.org/rhysd/github-clone-all.svg?branch=master
+[Mac and Linux Build Status]: https://travis-ci.org/rhysd/github-clone-all.svg?branch=master
 [Travis CI]: https://travis-ci.org/rhysd/github-clone-all
+[Windows Build Status]: https://ci.appveyor.com/api/projects/status/fwaaouneyn9kftts/branch/master?svg=true
+[Appveyor]: https://ci.appveyor.com/project/rhysd/github-clone-all/branch/master
