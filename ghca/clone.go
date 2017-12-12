@@ -84,10 +84,8 @@ func (cl *Cloner) newWorker() {
 					if info.IsDir() {
 						return nil
 					}
-					if !extract.MatchString(path) {
-						if err := os.Remove(path); err != nil {
-							return err
-						}
+					if (info.Mode()&os.ModeSymlink != 0) || !extract.MatchString(path) {
+						return os.Remove(path)
 					}
 					return nil
 				}); err != nil {
