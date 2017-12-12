@@ -22,6 +22,16 @@ const usageHeader = `Usage: github-clone-all [Flags] {Query}
   Because of restriction of GitHub search API, max number of results is 1000.
   And you need to gain GitHub API token in advance to avoid API rate limit.
 
+  All arguments in {Query} are regarded as query.
+  For example,
+
+  $ github-clone-all foo bar
+
+  will search 'foo bar'. But quoting the query is recommended to avoid
+  conflicting with shell special characters as following:
+
+  $ github-clone-all 'foo bar'
+
   You can get the token as following:
 
   1. Visit https://github.com/settings/tokens in a browser
@@ -35,7 +45,7 @@ const usageHeader = `Usage: github-clone-all [Flags] {Query}
 
 Example:
 
-  $ github-clone-all -token xxxxxxxx -extract '(\.vim|vimrc)$' language:vim fork:false stars>1
+  $ github-clone-all -token xxxxxxxx -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
 
   It clones first 1000 repositories into 'repos' directory in the current
   working directory.
@@ -45,10 +55,10 @@ Example:
     - not a fork repo
     - stars of repo is more than 1
 
-  If the token is set to $GITHUB_TOKEN environment variable, following should work
-  fine.
+  If the token is set to $GITHUB_TOKEN environment variable, following should
+  also work fine.
 
-  $ github-clone-all -extract '(\.vim|vimrc)$' language:vim fork:false stars>1
+  $ github-clone-all -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
 
 
 Flags:`

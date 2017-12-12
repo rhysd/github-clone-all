@@ -20,6 +20,10 @@ Because of restriction of GitHub search API, max number of results is 1000. And 
 gain GitHub API token in advance to avoid API rate limit. `github-clone-all` will refer the token
 via `-token` flag or `$GITHUB_TOKEN` environment variable.
 
+All arguments in {Query} are regarded as query. For example, `github-clone-all foo bar` will search
+`foo bar`. But quoting the query is recommended to avoid conflicting with shell special characters
+as `github-clone-all 'foo bar'`.
+
 
 ## Installation
 
@@ -33,7 +37,7 @@ $ go get github.com/rhysd/github-clone-all
 ## Example
 
 ```
-$ github-clone-all -token xxxxxxxx -extract '(\.vim|vimrc)$' language:vim fork:false stars>1
+$ github-clone-all -token xxxxxxxx -extract '(\.vim|vimrc)$' language:vim fork:false stars:>1
 ```
 
 It clones first 1000 repositories into 'repos' directory in the current working directory.
@@ -46,7 +50,7 @@ Query condition:
 If the token is set to `$GITHUB_TOKEN` environment variable, following should also work fine.
 
 ```
-$ github-clone-all -extract '(\.vim|vimrc)$' language:vim fork:false stars>1
+$ github-clone-all -extract '(\.vim|vimrc)$' language:vim fork:false stars:>1
 ```
 
 
