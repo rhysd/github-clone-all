@@ -1,5 +1,6 @@
 Clone matching repos on GitHub
 ==============================
+[![GoDoc Badge][]][GoDoc]
 [![Mac and Linux Build Status][]][Travis CI]
 [![Windows Build Status][]][Appveyor]
 [![Coverage Status][]][Codecov]
@@ -72,12 +73,15 @@ functions of the tool.
 import "github.com/rhysd/github-clone-all/ghca"
 ```
 
+Please read [documentation][GoDoc] for more detail.
 
 ## License
 
 [MIT license](LICENSE)
 
 [GitHub Search API]: https://developer.github.com/v3/search/
+[GoDoc Badge]: https://godoc.org/github.com/rhysd/github-clone-all/ghca?status.svg
+[GoDoc]: https://godoc.org/github.com/rhysd/github-clone-all/ghca
 [Mac and Linux Build Status]: https://travis-ci.org/rhysd/github-clone-all.svg?branch=master
 [Travis CI]: https://travis-ci.org/rhysd/github-clone-all
 [Windows Build Status]: https://ci.appveyor.com/api/projects/status/fwaaouneyn9kftts/branch/master?svg=true

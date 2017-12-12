@@ -14,6 +14,7 @@ import (
 const maxConcurrency = 4
 const maxBuffer = 1000
 
+// Cloner is a git-clone worker to clone given repositories with workers in parallel.
 type Cloner struct {
 	git     string
 	dest    string
@@ -24,6 +25,7 @@ type Cloner struct {
 	SSH     bool
 }
 
+// NewCloner creates a new cloner instance. 'extract' parameter can be nil.
 func NewCloner(dest string, extract *regexp.Regexp) *Cloner {
 	c := &Cloner{
 		git:     os.Getenv("GIT_EXECUTABLE_PATH"),
@@ -39,6 +41,7 @@ func NewCloner(dest string, extract *regexp.Regexp) *Cloner {
 	return c
 }
 
+// Clone clones the repository. Format of 'repo' parameter is 'owner/name'.
 func (cl *Cloner) Clone(repo string) {
 	cl.repos <- repo
 }
@@ -103,6 +106,7 @@ func (cl *Cloner) newWorker() {
 	}()
 }
 
+// Start starts underlying workers and makes ready for running.
 func (cl *Cloner) Start() {
 	para := runtime.NumCPU() - 1
 	log.Println("Start to clone with", para, "workers")
@@ -111,6 +115,7 @@ func (cl *Cloner) Start() {
 	}
 }
 
+// Shutdown stops all workers and waits until all of current tasks are completed.
 func (cl *Cloner) Shutdown() {
 	close(cl.repos)
 	cl.wg.Wait()

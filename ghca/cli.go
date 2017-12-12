@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// CLI represents a command line interface of github-clone-all.
 type CLI struct {
 	token   string
 	query   string
@@ -27,6 +28,7 @@ func (c *CLI) ensureReposDir() error {
 	return nil
 }
 
+// Run processes github-clone-all with given options.
 func (c *CLI) Run() (err error) {
 	if err = c.ensureReposDir(); err != nil {
 		return
@@ -36,6 +38,7 @@ func (c *CLI) Run() (err error) {
 	return
 }
 
+// NewCLI creates a new command line interface to run github-clone-all.
 func NewCLI(t, q, d, e string) (*CLI, error) {
 	var err error
 

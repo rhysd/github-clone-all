@@ -11,12 +11,16 @@ import (
 	"time"
 )
 
+// Collector is a worker to fetch repositories via GitHub Search API and clone them all.
 type Collector struct {
 	perPage uint
 	maxPage uint
 	page    uint
-	Query   string
-	Dest    string
+	// Query is a query to search repositories on GitHub.
+	Query string
+	// Dest is a directory to clone repository into.
+	Dest string
+	// Extract is a regular expression to extract files with. It can be nil.
 	Extract *regexp.Regexp
 	client  *github.Client
 	ctx     context.Context
@@ -36,6 +40,8 @@ func (col *Collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 	return r, nil
 }
 
+// Collect collects all repositories based on results of GitHub Search API. It returns total number
+// of atucally cloned repositories and total number of repositories on GitHub.
 func (col *Collector) Collect() (int, int, error) {
 	log.Println("Searching GitHub repositories with query:", col.Query)
 	start := time.Now()
@@ -80,14 +86,20 @@ func (col *Collector) Collect() (int, int, error) {
 	return count, total, nil
 }
 
+// PageConfig represents configurations for pagination of the Search API.
 type PageConfig struct {
-	Per   uint
-	Max   uint
+	// Per represents how many repositories per sending request.
+	Per uint
+	// Max represents a max page.
+	Max uint
+	// Start represents which page should be started.
 	Start uint
 }
 
+// PageUnlimited means to fetch and clone repositories as much as possible.
 const PageUnlimited uint = 0
 
+// NewCollector creates Collector instance.
 func NewCollector(query, token, dest string, extract *regexp.Regexp, page *PageConfig) *Collector {
 	ctx := context.Background()
 	src := oauth2.StaticTokenSource(
