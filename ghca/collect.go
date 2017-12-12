@@ -38,6 +38,7 @@ func (col *Collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 
 func (col *Collector) Collect() (int, int, error) {
 	log.Println("Searching GitHub repositories with query:", col.Query)
+	start := time.Now()
 	cloner := NewCloner(col.Dest, col.Extract)
 	cloner.Start()
 
@@ -74,7 +75,7 @@ func (col *Collector) Collect() (int, int, error) {
 
 	cloner.Shutdown()
 
-	log.Println(count, "repositories were cloned into", col.Dest, "for total", total, "search results")
+	log.Printf("%d repositories were cloned into '%s' for total %d search results (%f seconds)\n", count, col.Dest, total, time.Now().Sub(start).Seconds())
 
 	return count, total, nil
 }

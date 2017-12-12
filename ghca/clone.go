@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sync"
 )
 
@@ -103,7 +104,9 @@ func (cl *Cloner) newWorker() {
 }
 
 func (cl *Cloner) Start() {
-	for i := 0; i < maxConcurrency; i++ {
+	para := runtime.NumCPU() - 1
+	log.Println("Start to clone with", para, "workers")
+	for i := 0; i < para; i++ {
 		cl.newWorker()
 	}
 }
