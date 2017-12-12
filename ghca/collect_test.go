@@ -42,6 +42,10 @@ func TestNewCollectorWithConfig(t *testing.T) {
 }
 
 func TestCollectReposTotalIsAFew(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping test in short mode")
+	}
+
 	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
 		t.Skip("Skipping because API token not found")
@@ -72,6 +76,10 @@ func TestCollectReposTotalIsAFew(t *testing.T) {
 }
 
 func TestCollectReposTotalIsLarge(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping test in short mode")
+	}
+
 	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
 		t.Skip("Skipping because API token not found")

@@ -14,7 +14,7 @@ func TestNewCLI(t *testing.T) {
 	if cli.token != "token" {
 		t.Error("Unexpected token", cli.token)
 	}
-	if cli.query != "foo stars>1 language:lang fork:false" {
+	if cli.query != "foo stars>1" {
 		t.Error("Unexpected query", cli.query)
 	}
 	if cli.dest != "dest" {
@@ -111,7 +111,7 @@ func TestDestAlreadyExistAsFile(t *testing.T) {
 	if err := f.Close(); err != nil {
 		t.Fatal(err)
 	}
-	cli, err := NewCLI("token", "", "lang", "", "")
+	cli, err := NewCLI("token", "query", "", "")
 	if err != nil {
 		t.Fatal(err)
 	}

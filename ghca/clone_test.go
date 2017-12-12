@@ -26,6 +26,10 @@ func TestNewCloner(t *testing.T) {
 }
 
 func testRepos(repos []string, t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping test in short mode.")
+	}
+
 	c := NewCloner("test", nil)
 	defer func() {
 		os.RemoveAll("test")
