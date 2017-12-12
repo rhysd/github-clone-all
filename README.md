@@ -4,20 +4,22 @@ Clone matching repos on GitHub
 [![Windows Build Status][]][Appveyor]
 [![Coverage Status][]][Codecov]
 
-`github-clone-all` is a small command to clone all repositories matching to given query and
-language via [GitHub Search API][].
-It clones many repositories in parallel. Please see `-help` option to know all flags.
+```
+$ github-clone-all [flags] {query}
+```
 
-Query is the same as GitHub search syntax. And 'stars>1 fork:false' is added by default for
-sensible search results.
+`github-clone-all` is a small command to clone all repositories matching to given query and
+language via [GitHub Search API][]. Query must not be empty.
+It clones many repositories in parallel. Please see `-help` option to know all flags.
 
 Repository is cloned to 'dest' directory. It is `$cwd/repos` by default and can be specified with
 `-dest` flag. And in order to reduce size of cloned repositories, `-extract` option is available.
 `-extract` only leaves files matching to given regular expression.
 
 Because of restriction of GitHub search API, max number of results is 1000. And you need to
-gain GitHub API token in advance. `github-clone-all` will refer the token via `-token` flag or
-`$GITHUB_TOKEN` environment variable.
+gain GitHub API token in advance to avoid API rate limit. `github-clone-all` will refer the token
+via `-token` flag or `$GITHUB_TOKEN` environment variable.
+
 
 ## Installation
 
@@ -27,14 +29,26 @@ Use `go get` or [released binaries](https://github.com/rhysd/github-clone-all/re
 $ go get github.com/rhysd/github-clone-all
 ```
 
+
 ## Example
 
 ```
-$ github-clone-all -token $GITHUB_TOKEN -lang vim -extract '(\.vim|vimrc)$'
+$ github-clone-all -token xxxxxxxx -extract '(\.vim|vimrc)$' language:vim fork:false stars>1
 ```
 
-It clones first 1000 repositories whose language is 'vim' into 'repos' directory in the current
-working directory.
+It clones first 1000 repositories into 'repos' directory in the current working directory.
+
+Query condition:
+- language is 'vim'
+- not a fork repo
+- stars of repo is more than 1
+
+If the token is set to `$GITHUB_TOKEN` environment variable, following should also work fine.
+
+```
+$ github-clone-all -extract '(\.vim|vimrc)$' language:vim fork:false stars>1
+```
+
 
 ## How to get GitHub API token
 
@@ -42,7 +56,8 @@ working directory.
 2. Click 'Generate new token'
 3. Add token description
 4. Without checking any checkbox, click 'Generate token'
-5. Key is shown in your tokens list
+5. Generated token is shown at the top of your tokens list
+
 
 ## Use github-clone-all programmatically
 
@@ -52,6 +67,7 @@ functions of the tool.
 ```go
 import "github.com/rhysd/github-clone-all/ghca"
 ```
+
 
 ## License
 
