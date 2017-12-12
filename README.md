@@ -10,8 +10,8 @@ $ github-clone-all [flags] {query}
 ```
 
 `github-clone-all` is a small command to clone all repositories matching to given query and
-language via [GitHub Search API][]. Query must not be empty.
-It clones many repositories in parallel. Please see `-help` option to know all flags.
+language via [GitHub Search API][]. The query should be in [GitHub search syntax][] and cannot be
+empty. It clones many repositories in parallel. Please see `-help` option to know all flags.
 
 Repository is cloned to 'dest' directory. It is `$cwd/repos` by default and can be specified with
 `-dest` flag. And in order to reduce size of cloned repositories, `-extract` option is available.
@@ -38,7 +38,7 @@ $ go get github.com/rhysd/github-clone-all
 ## Example
 
 ```
-$ github-clone-all -token xxxxxxxx -extract '(\.vim|vimrc)$' language:vim fork:false stars:>1
+$ github-clone-all -token xxxxxxxx -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
 ```
 
 It clones first 1000 repositories into 'repos' directory in the current working directory.
@@ -48,10 +48,10 @@ Query condition:
 - not a fork repo
 - stars of repo is more than 1
 
-If the token is set to `$GITHUB_TOKEN` environment variable, following should also work fine.
+If the token is set to `$GITHUB_TOKEN` environment variable, omitting `-token` should also work fine.
 
 ```
-$ github-clone-all -extract '(\.vim|vimrc)$' language:vim fork:false stars:>1
+$ github-clone-all -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
 ```
 
 
@@ -79,6 +79,7 @@ Please read [documentation][GoDoc] for more detail.
 
 [MIT license](LICENSE)
 
+[GitHub search syntax]: https://help.github.com/articles/understanding-the-search-syntax/
 [GitHub Search API]: https://developer.github.com/v3/search/
 [GoDoc Badge]: https://godoc.org/github.com/rhysd/github-clone-all/ghca?status.svg
 [GoDoc]: https://godoc.org/github.com/rhysd/github-clone-all/ghca

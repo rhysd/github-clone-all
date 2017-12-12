@@ -12,11 +12,12 @@ import (
 )
 
 // Collector is a worker to fetch repositories via GitHub Search API and clone them all.
+// You should NOT reuse Collector instance for multiple queries.
 type Collector struct {
 	perPage uint
 	maxPage uint
 	page    uint
-	// Query is a query to search repositories on GitHub.
+	// Query is a query to search repositories on GitHub. https://help.github.com/articles/understanding-the-search-syntax/
 	Query string
 	// Dest is a directory to clone repository into.
 	Dest string

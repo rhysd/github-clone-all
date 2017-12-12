@@ -40,7 +40,10 @@ const usageHeader = `USAGE: github-clone-all [FLAGS] {query}
   4. Without checking any checkbox, click 'Generate token'
   5. Key is shown in your tokens list
 
-  ref: https://developer.github.com/v3/search/
+  Search Syntax:
+    https://help.github.com/articles/understanding-the-search-syntax/
+  Search API Documentation:
+    https://developer.github.com/v3/search/
 
 
 EXAMPLE:

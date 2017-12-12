@@ -39,6 +39,7 @@ func (c *CLI) Run() (err error) {
 }
 
 // NewCLI creates a new command line interface to run github-clone-all.
+// Query ('q' parameter) must not be empty.
 func NewCLI(t, q, d, e string) (*CLI, error) {
 	var err error
 
