@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-const usageHeader = `Usage: github-clone-all [Flags] {Query}
+const usageHeader = `USAGE: github-clone-all [FLAGS] {query}
 
   github-clone-all is a command to clone all repositories matching to given
   query via GitHub Search API. Query must not be empty.
@@ -22,7 +22,7 @@ const usageHeader = `Usage: github-clone-all [Flags] {Query}
   Because of restriction of GitHub search API, max number of results is 1000.
   And you need to gain GitHub API token in advance to avoid API rate limit.
 
-  All arguments in {Query} are regarded as query.
+  All arguments in {query} are regarded as query.
   For example,
 
   $ github-clone-all foo bar
@@ -43,7 +43,7 @@ const usageHeader = `Usage: github-clone-all [Flags] {Query}
   ref: https://developer.github.com/v3/search/
 
 
-Example:
+EXAMPLE:
 
   $ github-clone-all -token xxxxxxxx -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
 
@@ -61,7 +61,7 @@ Example:
   $ github-clone-all -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
 
 
-Flags:`
+FLAGS:`
 
 func usage() {
 	fmt.Fprintln(os.Stderr, usageHeader)

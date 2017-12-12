@@ -20,7 +20,7 @@ Because of restriction of GitHub search API, max number of results is 1000. And 
 gain GitHub API token in advance to avoid API rate limit. `github-clone-all` will refer the token
 via `-token` flag or `$GITHUB_TOKEN` environment variable.
 
-All arguments in {Query} are regarded as query. For example, `github-clone-all foo bar` will search
+All arguments in {query} are regarded as query. For example, `github-clone-all foo bar` will search
 `foo bar`. But quoting the query is recommended to avoid conflicting with shell special characters
 as `github-clone-all 'foo bar'`.
 
