@@ -26,10 +26,6 @@ func TestNewCloner(t *testing.T) {
 }
 
 func testRepos(repos []string, t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping test in short mode.")
-	}
-
 	c := NewCloner("test", nil)
 	defer func() {
 		os.RemoveAll("test")
@@ -65,6 +61,10 @@ func TestClone1Repo(t *testing.T) {
 }
 
 func TestCloneAFewRepos(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping test in short mode.")
+	}
+
 	repos := []string{
 		"rhysd/clever-f.vim",
 		"rhysd/neovim-component",
@@ -74,6 +74,10 @@ func TestCloneAFewRepos(t *testing.T) {
 }
 
 func TestCloneManyRepos(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping test in short mode.")
+	}
+
 	repos := []string{
 		"rhysd/inu-snippets",
 		"rhysd/conflict-marker.vim",

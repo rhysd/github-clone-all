@@ -115,3 +115,14 @@ func TestCollectReposTotalIsLarge(t *testing.T) {
 		t.Fatal("'test' directory is empty")
 	}
 }
+
+func TestBadCredential(t *testing.T) {
+	defer func() {
+		os.RemoveAll("test")
+	}()
+	c := NewCollector("clever-f.vim language:vim fork:false", "badcredentials", "test", nil, nil)
+	_, _, err := c.Collect()
+	if err == nil {
+		t.Fatal("Bad credentials should cause an error on collecting")
+	}
+}
