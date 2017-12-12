@@ -7,23 +7,32 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 )
 
-const usageHeader = `Usage: github-clone-all {Flags}
+const usageHeader = `USAGE: github-clone-all [FLAGS] {query}
 
   github-clone-all is a command to clone all repositories matching to given
-  query and language via GitHub Search API.
+  query via GitHub Search API. Query must not be empty.
   It clones many repositories in parallel.
-
-  Query is the same as GitHub search syntax. And 'stars>1 fork:false' is
-  added by default for sensible search results.
 
   Repository is cloned to 'dest' directory. It is $cwd/repos by default and
   can be specified with -dest flag.
 
   Because of restriction of GitHub search API, max number of results is 1000.
-  And you need to gain GitHub API token in advance. You can get the token as
-  following:
+  And you need to gain GitHub API token in advance to avoid API rate limit.
+
+  All arguments in {query} are regarded as query.
+  For example,
+
+  $ github-clone-all foo bar
+
+  will search 'foo bar'. But quoting the query is recommended to avoid
+  conflicting with shell special characters as following:
+
+  $ github-clone-all 'foo bar'
+
+  You can get the token as following:
 
   1. Visit https://github.com/settings/tokens in a browser
   2. Click 'Generate new token'
@@ -33,14 +42,26 @@ const usageHeader = `Usage: github-clone-all {Flags}
 
   ref: https://developer.github.com/v3/search/
 
-Example:
 
-  $ github-clone-all -token $GITHUB_TOKEN -lang vim -extract '(\.vim|vimrc)$'
+EXAMPLE:
 
-  It clones first 1000 repositories whose language is 'vim' into 'repos'
-  directory in the current working directory.
+  $ github-clone-all -token xxxxxxxx -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
 
-Flags:`
+  It clones first 1000 repositories into 'repos' directory in the current
+  working directory.
+
+  Query condition:
+    - language is 'vim'
+    - not a fork repo
+    - stars of repo is more than 1
+
+  If the token is set to $GITHUB_TOKEN environment variable, following should
+  also work fine.
+
+  $ github-clone-all -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
+
+
+FLAGS:`
 
 func usage() {
 	fmt.Fprintln(os.Stderr, usageHeader)
@@ -50,12 +71,10 @@ func usage() {
 func main() {
 	help := flag.Bool("help", false, "Show this help")
 	h := flag.Bool("h", false, "Show this help")
-	token := flag.String("token", "", "GitHub token to call GitHub API. $GITHUB_TOKEN environment variable is also referred (required)")
-	query := flag.String("query", "", "Additional query string to search (optional)")
-	lang := flag.String("lang", "", "Language name to search repos (required)")
-	dest := flag.String("dest", "", "Directory to store the downloaded files. By default 'repos' in current working directory (optional)")
-	extract := flag.String("extract", "", "Regular expression to extract files in each cloned repo (optional)")
-	quiet := flag.Bool("quiet", false, "Run quietly. Exit status is non-zero, it means error occurred (optional)")
+	token := flag.String("token", "", "GitHub token to call GitHub API. If this option is not specified, $GITHUB_TOKEN environment variable needs to be set")
+	dest := flag.String("dest", "", "Directory to store the downloaded files. By default 'repos' in current working directory")
+	extract := flag.String("extract", "", "Regular expression to extract files in each cloned repo")
+	quiet := flag.Bool("quiet", false, "Run quietly. Exit status is non-zero, it means error occurred")
 
 	flag.Usage = usage
 	flag.Parse()
@@ -69,7 +88,9 @@ func main() {
 		log.SetOutput(ioutil.Discard)
 	}
 
-	cli, err := ghca.NewCLI(*token, *query, *lang, *dest, *extract)
+	query := strings.Join(flag.Args(), " ")
+
+	cli, err := ghca.NewCLI(*token, query, *dest, *extract)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(3)

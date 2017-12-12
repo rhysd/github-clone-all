@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sync"
 )
 
@@ -84,10 +85,8 @@ func (cl *Cloner) newWorker() {
 					if info.IsDir() {
 						return nil
 					}
-					if !extract.MatchString(path) {
-						if err := os.Remove(path); err != nil {
-							return err
-						}
+					if (info.Mode()&os.ModeSymlink != 0) || !extract.MatchString(path) {
+						return os.Remove(path)
 					}
 					return nil
 				}); err != nil {
@@ -105,7 +104,9 @@ func (cl *Cloner) newWorker() {
 }
 
 func (cl *Cloner) Start() {
-	for i := 0; i < maxConcurrency; i++ {
+	para := runtime.NumCPU() - 1
+	log.Println("Start to clone with", para, "workers")
+	for i := 0; i < para; i++ {
 		cl.newWorker()
 	}
 }

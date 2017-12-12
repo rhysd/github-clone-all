@@ -7,14 +7,14 @@ import (
 )
 
 func TestNewCLI(t *testing.T) {
-	cli, err := NewCLI("token", "foo stars>1", "lang", "dest", "")
+	cli, err := NewCLI("token", "foo stars>1", "dest", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if cli.token != "token" {
 		t.Error("Unexpected token", cli.token)
 	}
-	if cli.query != "foo stars>1 language:lang fork:false" {
+	if cli.query != "foo stars>1" {
 		t.Error("Unexpected query", cli.query)
 	}
 	if cli.dest != "dest" {
@@ -26,7 +26,7 @@ func TestNewCLI(t *testing.T) {
 }
 
 func TestEmptyDest(t *testing.T) {
-	cli, err := NewCLI("token", "query", "lang", "", "")
+	cli, err := NewCLI("token", "query", "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,23 +37,31 @@ func TestEmptyDest(t *testing.T) {
 	}
 }
 
-func TestEmptyTokenOrLang(t *testing.T) {
+func TestEmptyToken(t *testing.T) {
 	token := os.Getenv("GITHUB_TOKEN")
 	os.Setenv("GITHUB_TOKEN", "")
-	if _, err := NewCLI("", "", "vim", "", ""); err == nil {
+	if _, err := NewCLI("", "query", "", ""); err == nil {
 		t.Error("Empty token should raise an error")
 	}
-
-	if _, err := NewCLI("", "foobar", "", "", ""); err == nil {
-		t.Error("Empty lang should raise an error")
-	}
 	os.Setenv("GITHUB_TOKEN", token)
+}
+
+func TestEmptyQuery(t *testing.T) {
+	for _, q := range []string{
+		"",
+		"   ",
+		"	",
+	} {
+		if _, err := NewCLI("token", q, "", ""); err == nil {
+			t.Errorf("Empty query should raise an error: '%s'", q)
+		}
+	}
 }
 
 func TestGitHubTokenEnv(t *testing.T) {
 	token := os.Getenv("GITHUB_TOKEN")
 	os.Setenv("GITHUB_TOKEN", "foobar")
-	cli, err := NewCLI("", "", "vim", "", "")
+	cli, err := NewCLI("", "query", "", "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,16 +72,15 @@ func TestGitHubTokenEnv(t *testing.T) {
 }
 
 func TestInvalidRegexp(t *testing.T) {
-	if _, err := NewCLI("token", "", "vim", "", "(foo"); err == nil {
+	if _, err := NewCLI("token", "query", "", "(foo"); err == nil {
 		t.Error("Broken regexp must raise an error")
 	}
-
 }
 
 func TestMakeDest(t *testing.T) {
 	defer os.Remove("repos")
 
-	cli, err := NewCLI("token", "", "lang", "", "")
+	cli, err := NewCLI("token", "query", "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +111,7 @@ func TestDestAlreadyExistAsFile(t *testing.T) {
 	if err := f.Close(); err != nil {
 		t.Fatal(err)
 	}
-	cli, err := NewCLI("token", "", "lang", "", "")
+	cli, err := NewCLI("token", "query", "", "")
 	if err != nil {
 		t.Fatal(err)
 	}

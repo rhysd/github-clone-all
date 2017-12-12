@@ -1,10 +1,12 @@
 package ghca
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 type CLI struct {
@@ -34,14 +36,14 @@ func (c *CLI) Run() (err error) {
 	return
 }
 
-func NewCLI(t, q, l, d, e string) (*CLI, error) {
+func NewCLI(t, q, d, e string) (*CLI, error) {
 	var err error
 
-	if env := os.Getenv("GITHUB_TOKEN"); env != "" && t == "" {
-		t = env
+	if t == "" {
+		t = os.Getenv("GITHUB_TOKEN")
 	}
 
-	if t == "" || l == "" {
+	if t == "" {
 		return nil, fmt.Errorf("API token and language must be set. Please see -help for more detail")
 	}
 
@@ -61,6 +63,10 @@ func NewCLI(t, q, l, d, e string) (*CLI, error) {
 		}
 	}
 
-	q = fmt.Sprintf("%s language:%s fork:false", q, l)
+	q = strings.TrimSpace(q)
+	if q == "" {
+		return nil, errors.New("Query cannot be empty")
+	}
+
 	return &CLI{t, q, d, r}, nil
 }
