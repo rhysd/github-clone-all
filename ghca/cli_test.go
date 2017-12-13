@@ -59,7 +59,7 @@ func TestEmptyQuery(t *testing.T) {
 }
 
 func TestGitHubTokenEnv(t *testing.T) {
-	token := os.Getenv("GITHUB_TOKEN")
+	saved := os.Getenv("GITHUB_TOKEN")
 	os.Setenv("GITHUB_TOKEN", "foobar")
 	cli, err := NewCLI("", "query", "", "")
 	if err != nil {
@@ -68,7 +68,7 @@ func TestGitHubTokenEnv(t *testing.T) {
 	if cli.token != "foobar" {
 		t.Error("Unexpected token", cli.token)
 	}
-	os.Setenv("GITHUB_TOKEN", token)
+	os.Setenv("GITHUB_TOKEN", saved)
 }
 
 func TestInvalidRegexp(t *testing.T) {
@@ -117,5 +117,25 @@ func TestDestAlreadyExistAsFile(t *testing.T) {
 	}
 	if err := cli.ensureReposDir(); err == nil {
 		t.Fatal("Error should occur when file is already created")
+	}
+}
+
+func TestRunCLI(t *testing.T) {
+	if os.Getenv("GITHUB_TOKEN") == "" {
+		t.Skip("$GITHUB_TOKEN is not set")
+	}
+	defer os.Remove("test")
+
+	cli, err := NewCLI("", "user:rhysd non-existing-repo", "test", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := cli.Run(); err != nil {
+		t.Fatal("Error occurred while CLI running:", err)
+	}
+
+	if _, err := os.Stat("test"); err != nil {
+		t.Fatal("Dest directory was not created:", err)
 	}
 }
