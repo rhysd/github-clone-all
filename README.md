@@ -49,6 +49,7 @@ Query condition:
 - stars of repo is more than 1
 
 If the token is set to `$GITHUB_TOKEN` environment variable, omitting `-token` should also work fine.
+Only files which ending with '.vim' or 'vimrc' remain in each repositories.
 
 ```
 $ github-clone-all -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'

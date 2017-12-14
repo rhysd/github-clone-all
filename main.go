@@ -51,7 +51,8 @@ EXAMPLE:
   $ github-clone-all -token xxxxxxxx -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
 
   It clones first 1000 repositories into 'repos' directory in the current
-  working directory.
+  working directory. Only files which ending with '.vim' or 'vimrc' remain in
+  each repositories.
 
   Query condition:
     - language is 'vim'
