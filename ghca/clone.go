@@ -20,9 +20,11 @@ type Cloner struct {
 	dest    string
 	extract *regexp.Regexp
 	repos   chan string
-	Err     chan error
-	wg      sync.WaitGroup
-	SSH     bool
+	// Err is a receiver of errors which occurs while cloning repositories
+	Err chan error
+	wg  sync.WaitGroup
+	// SSH is a flag to use SSH for git-clone. By default, it's false and HTTPS is used.
+	SSH bool
 }
 
 // NewCloner creates a new cloner instance. 'extract' parameter can be nil.
