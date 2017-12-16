@@ -1,3 +1,9 @@
+// Package ghca provides functionalities of github-clone-all command.
+// Because of restriction of GitHub search API, max number of results is 1000 repositories.
+// And you may need to gain GitHub API token in advance to avoid reaching API rate limit.
+//
+// Please see the repository page to know more detail.
+//   https://github.com/rhysd/github-clone-all
 package ghca
 
 import (
