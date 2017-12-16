@@ -7,6 +7,7 @@ import (
 	"golang.org/x/oauth2"
 	"log"
 	"math"
+	"net/http"
 	"regexp"
 	"time"
 )
@@ -103,11 +104,18 @@ const PageUnlimited uint = 0
 // NewCollector creates Collector instance.
 func NewCollector(query, token, dest string, extract *regexp.Regexp, page *PageConfig) *Collector {
 	ctx := context.Background()
-	src := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
-	)
-	client := github.NewClient(oauth2.NewClient(ctx, src))
+
+	var auth *http.Client
+	if token != "" {
+		src := oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: token},
+		)
+		auth = oauth2.NewClient(ctx, src)
+	}
+
+	client := github.NewClient(auth)
 	c := &Collector{100, PageUnlimited, 1, query, dest, extract, client, ctx}
+
 	if page != nil {
 		c.perPage = page.Per
 		c.maxPage = page.Max
@@ -116,5 +124,6 @@ func NewCollector(query, token, dest string, extract *regexp.Regexp, page *PageC
 	if c.maxPage == PageUnlimited {
 		c.maxPage = uint(math.Ceil(1000.0 / float64(c.perPage)))
 	}
+
 	return c
 }

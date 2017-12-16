@@ -37,15 +37,6 @@ func TestEmptyDest(t *testing.T) {
 	}
 }
 
-func TestEmptyToken(t *testing.T) {
-	token := os.Getenv("GITHUB_TOKEN")
-	os.Setenv("GITHUB_TOKEN", "")
-	if _, err := NewCLI("", "query", "", ""); err == nil {
-		t.Error("Empty token should raise an error")
-	}
-	os.Setenv("GITHUB_TOKEN", token)
-}
-
 func TestEmptyQuery(t *testing.T) {
 	for _, q := range []string{
 		"",

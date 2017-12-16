@@ -47,10 +47,6 @@ func NewCLI(t, q, d, e string) (*CLI, error) {
 		t = os.Getenv("GITHUB_TOKEN")
 	}
 
-	if t == "" {
-		return nil, fmt.Errorf("API token and language must be set. Please see -help for more detail")
-	}
-
 	if d == "" {
 		d, err = os.Getwd()
 		if err != nil {
