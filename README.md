@@ -17,11 +17,11 @@ Repository is cloned to 'dest' directory. It is `$cwd/repos` by default and can 
 `-dest` flag. And in order to reduce size of cloned repositories, `-extract` option is available.
 `-extract` only leaves files matching to given regular expression.
 
-Because of restriction of GitHub search API, max number of results is 1000. And you need to
-gain GitHub API token in advance to avoid API rate limit. `github-clone-all` will refer the token
-via `-token` flag or `$GITHUB_TOKEN` environment variable.
+Because of restriction of GitHub search API, max number of results is 1000 repositories. And you may
+need to gain GitHub API token in advance to avoid reaching API rate limit. `github-clone-all` will
+refer the token via `-token` flag or `$GITHUB_TOKEN` environment variable.
 
-All arguments in {query} are regarded as query. For example, `github-clone-all foo bar` will search
+All arguments in `{query}` are regarded as query. For example, `github-clone-all foo bar` will search
 `foo bar`. But quoting the query is recommended to avoid conflicting with shell special characters
 as `github-clone-all 'foo bar'`.
 
@@ -38,7 +38,7 @@ $ go get github.com/rhysd/github-clone-all
 ## Example
 
 ```
-$ github-clone-all -token xxxxxxxx -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
+$ github-clone-all -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
 ```
 
 It clones first 1000 repositories into 'repos' directory in the current working directory.
@@ -47,13 +47,6 @@ Query condition:
 - language is 'vim'
 - not a fork repo
 - stars of repo is more than 1
-
-If the token is set to `$GITHUB_TOKEN` environment variable, omitting `-token` should also work fine.
-Only files which ending with '.vim' or 'vimrc' remain in each repositories.
-
-```
-$ github-clone-all -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
-```
 
 
 ## How to get GitHub API token

@@ -19,9 +19,6 @@ const usageHeader = `USAGE: github-clone-all [FLAGS] {query}
   Repository is cloned to 'dest' directory. It is $cwd/repos by default and
   can be specified with -dest flag.
 
-  Because of restriction of GitHub search API, max number of results is 1000.
-  And you need to gain GitHub API token in advance to avoid API rate limit.
-
   All arguments in {query} are regarded as query.
   For example,
 
@@ -31,6 +28,10 @@ const usageHeader = `USAGE: github-clone-all [FLAGS] {query}
   conflicting with shell special characters as following:
 
   $ github-clone-all 'foo bar'
+
+  Because of restriction of GitHub search API, max number of results is 1000
+  repositories. And you may need to gain GitHub API token in advance to avoid
+  reaching API rate limit.
 
   You can get the token as following:
 
@@ -42,13 +43,14 @@ const usageHeader = `USAGE: github-clone-all [FLAGS] {query}
 
   Search Syntax:
     https://help.github.com/articles/understanding-the-search-syntax/
+
   Search API Documentation:
     https://developer.github.com/v3/search/
 
 
 EXAMPLE:
 
-  $ github-clone-all -token xxxxxxxx -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
+  $ github-clone-all -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
 
   It clones first 1000 repositories into 'repos' directory in the current
   working directory. Only files which ending with '.vim' or 'vimrc' remain in
@@ -58,11 +60,6 @@ EXAMPLE:
     - language is 'vim'
     - not a fork repo
     - stars of repo is more than 1
-
-  If the token is set to $GITHUB_TOKEN environment variable, following should
-  also work fine.
-
-  $ github-clone-all -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
 
 
 FLAGS:`
@@ -75,7 +72,7 @@ func usage() {
 func main() {
 	help := flag.Bool("help", false, "Show this help")
 	h := flag.Bool("h", false, "Show this help")
-	token := flag.String("token", "", "GitHub token to call GitHub API. If this option is not specified, $GITHUB_TOKEN environment variable needs to be set")
+	token := flag.String("token", "", "GitHub token to call GitHub API. $GITHUB_TOKEN environment variable is also referred")
 	dest := flag.String("dest", "", "Directory to store the downloaded files. By default 'repos' in current working directory")
 	extract := flag.String("extract", "", "Regular expression to extract files in each cloned repo")
 	quiet := flag.Bool("quiet", false, "Run quietly. Exit status is non-zero, it means error occurred")
