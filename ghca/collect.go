@@ -18,7 +18,10 @@ type Collector struct {
 	perPage uint
 	maxPage uint
 	page    uint
-	// Query is a query to search repositories on GitHub. https://help.github.com/articles/understanding-the-search-syntax/
+	// Query is a query to search repositories on GitHub.
+	// Please refer following links to know about query:
+	// https://help.github.com/articles/understanding-the-search-syntax/
+	// https://help.github.com/articles/searching-repositories/
 	Query string
 	// Dest is a directory to clone repository into.
 	Dest string

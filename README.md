@@ -10,8 +10,10 @@ $ github-clone-all [flags] {query}
 ```
 
 `github-clone-all` is a small command to clone all repositories matching to given query and
-language via [GitHub Search API][]. The query should be in [GitHub search syntax][] and cannot be
-empty. It clones many repositories in parallel. Please see `-help` option to know all flags.
+language via [GitHub Search API][]. To know the detail of query, please read
+[official document for GitHub Repository Search][GitHub Repository Search]. The query should be in
+[GitHub search syntax][] and cannot be empty. It clones many repositories in parallel. Please see
+`-help` option to know all flags.
 
 Repository is cloned to 'dest' directory. It is `$cwd/repos` by default and can be specified with
 `-dest` flag. And in order to reduce size of cloned repositories, `-extract` option is available.
@@ -87,6 +89,7 @@ Please read [documentation][GoDoc] for more detail.
 
 [MIT license](LICENSE)
 
+[GitHub Repository Search]: https://help.github.com/articles/searching-repositories/
 [GitHub search syntax]: https://help.github.com/articles/understanding-the-search-syntax/
 [GitHub Search API]: https://developer.github.com/v3/search/
 [GoDoc Badge]: https://godoc.org/github.com/rhysd/github-clone-all/ghca?status.svg
