@@ -109,8 +109,11 @@ func (cl *Cloner) newWorker() {
 }
 
 // Start starts underlying workers and makes ready for running.
-func (cl *Cloner) Start() {
-	para := runtime.NumCPU() - 1
+func (cl *Cloner) Start(para int) {
+	auto := runtime.NumCPU() - 1
+	if para == 0 || para > auto {
+		para = auto
+	}
 	log.Println("Start to clone with", para, "workers")
 	for i := 0; i < para; i++ {
 		cl.newWorker()

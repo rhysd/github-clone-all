@@ -21,6 +21,7 @@ type CLI struct {
 	query   string
 	dest    string
 	extract *regexp.Regexp // Maybe nil
+	count   int
 }
 
 func (c *CLI) ensureReposDir() error {
@@ -39,14 +40,14 @@ func (c *CLI) Run() (err error) {
 	if err = c.ensureReposDir(); err != nil {
 		return
 	}
-	col := NewCollector(c.query, c.token, c.dest, c.extract, nil)
+	col := NewCollector(c.query, c.token, c.dest, c.extract, c.count, nil)
 	_, _, err = col.Collect()
 	return
 }
 
 // NewCLI creates a new command line interface to run github-clone-all.
 // Query ('q' parameter) must not be empty.
-func NewCLI(t, q, d, e string) (*CLI, error) {
+func NewCLI(t, q, d, e string, c int) (*CLI, error) {
 	var err error
 
 	if t == "" {
@@ -74,5 +75,5 @@ func NewCLI(t, q, d, e string) (*CLI, error) {
 		return nil, errors.New("Query cannot be empty")
 	}
 
-	return &CLI{t, q, d, r}, nil
+	return &CLI{t, q, d, r, c}, nil
 }

@@ -76,6 +76,7 @@ func main() {
 	dest := flag.String("dest", "", "Directory to store the downloaded files. By default 'repos' in current working directory")
 	extract := flag.String("extract", "", "Regular expression to extract files in each cloned repo")
 	quiet := flag.Bool("quiet", false, "Run quietly. Exit status is non-zero, it means error occurred")
+	count := flag.Int("count", 0, "Max number of repositories to clone")
 
 	flag.Usage = usage
 	flag.Parse()
@@ -91,7 +92,7 @@ func main() {
 
 	query := strings.Join(flag.Args(), " ")
 
-	cli, err := ghca.NewCLI(*token, query, *dest, *extract)
+	cli, err := ghca.NewCLI(*token, query, *dest, *extract, *count)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(3)

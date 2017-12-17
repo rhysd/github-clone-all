@@ -24,6 +24,7 @@ type Collector struct {
 	Dest string
 	// Extract is a regular expression to extract files with. It can be nil.
 	Extract *regexp.Regexp
+	Count   int
 	client  *github.Client
 	ctx     context.Context
 }
@@ -48,10 +49,11 @@ func (col *Collector) Collect() (int, int, error) {
 	log.Println("Searching GitHub repositories with query:", col.Query)
 	start := time.Now()
 	cloner := NewCloner(col.Dest, col.Extract)
-	cloner.Start()
+	cloner.Start(col.Count)
 
 	total := 0
 	count := 0
+Fetch:
 	for col.page <= col.maxPage {
 		res, err := col.searchRepos()
 		if _, ok := err.(*github.RateLimitError); ok {
@@ -76,6 +78,9 @@ func (col *Collector) Collect() (int, int, error) {
 		for _, repo := range res.Repositories {
 			cloner.Clone(fmt.Sprintf("%s/%s", repo.GetOwner().GetLogin(), repo.GetName()))
 			count++
+			if col.Count > 0 && count >= col.Count {
+				break Fetch
+			}
 		}
 
 		col.page++
@@ -102,7 +107,7 @@ type PageConfig struct {
 const PageUnlimited uint = 0
 
 // NewCollector creates Collector instance.
-func NewCollector(query, token, dest string, extract *regexp.Regexp, page *PageConfig) *Collector {
+func NewCollector(query, token, dest string, extract *regexp.Regexp, count int, page *PageConfig) *Collector {
 	ctx := context.Background()
 
 	var auth *http.Client
@@ -114,7 +119,7 @@ func NewCollector(query, token, dest string, extract *regexp.Regexp, page *PageC
 	}
 
 	client := github.NewClient(auth)
-	c := &Collector{100, PageUnlimited, 1, query, dest, extract, client, ctx}
+	c := &Collector{100, PageUnlimited, 1, query, dest, extract, count, client, ctx}
 
 	if page != nil {
 		c.perPage = page.Per
@@ -122,7 +127,11 @@ func NewCollector(query, token, dest string, extract *regexp.Regexp, page *PageC
 		c.page = page.Start
 	}
 	if c.maxPage == PageUnlimited {
-		c.maxPage = uint(math.Ceil(1000.0 / float64(c.perPage)))
+		maxRepos := 1000.0
+		if count != 0 {
+			maxRepos = float64(count)
+		}
+		c.maxPage = uint(math.Ceil(maxRepos / float64(c.perPage)))
 	}
 
 	return c
