@@ -24,9 +24,12 @@ type Collector struct {
 	Dest string
 	// Extract is a regular expression to extract files with. It can be nil.
 	Extract *regexp.Regexp
-	Count   int
-	client  *github.Client
-	ctx     context.Context
+	// Count represents max number of repositories to clone
+	Count int
+	// Dry indicates doing dry-run instead of cloning repositories
+	Dry    bool
+	client *github.Client
+	ctx    context.Context
 }
 
 func (col *Collector) searchRepos() (*github.RepositoriesSearchResult, error) {
@@ -49,7 +52,9 @@ func (col *Collector) Collect() (int, int, error) {
 	log.Println("Searching GitHub repositories with query:", col.Query)
 	start := time.Now()
 	cloner := NewCloner(col.Dest, col.Extract)
-	cloner.Start(col.Count)
+	if !col.Dry {
+		cloner.Start(col.Count)
+	}
 
 	total := 0
 	count := 0
@@ -76,7 +81,12 @@ Fetch:
 		}
 
 		for _, repo := range res.Repositories {
-			cloner.Clone(fmt.Sprintf("%s/%s", repo.GetOwner().GetLogin(), repo.GetName()))
+			slug := fmt.Sprintf("%s/%s", repo.GetOwner().GetLogin(), repo.GetName())
+			if col.Dry {
+				fmt.Printf("dry-run: %s: %s\n", slug, repo.GetDescription())
+			} else {
+				cloner.Clone(slug)
+			}
 			count++
 			if col.Count > 0 && count >= col.Count {
 				break Fetch
@@ -86,9 +96,10 @@ Fetch:
 		col.page++
 	}
 
-	cloner.Shutdown()
-
-	log.Printf("%d repositories were cloned into '%s' for total %d search results (%f seconds)\n", count, col.Dest, total, time.Now().Sub(start).Seconds())
+	if !col.Dry {
+		cloner.Shutdown()
+		log.Printf("%d repositories were cloned into '%s' for total %d search results (%f seconds)\n", count, col.Dest, total, time.Now().Sub(start).Seconds())
+	}
 
 	return count, total, nil
 }
@@ -107,7 +118,7 @@ type PageConfig struct {
 const PageUnlimited uint = 0
 
 // NewCollector creates Collector instance.
-func NewCollector(query, token, dest string, extract *regexp.Regexp, count int, page *PageConfig) *Collector {
+func NewCollector(query, token, dest string, extract *regexp.Regexp, count int, dry bool, page *PageConfig) *Collector {
 	ctx := context.Background()
 
 	var auth *http.Client
@@ -119,7 +130,7 @@ func NewCollector(query, token, dest string, extract *regexp.Regexp, count int, 
 	}
 
 	client := github.NewClient(auth)
-	c := &Collector{100, PageUnlimited, 1, query, dest, extract, count, client, ctx}
+	c := &Collector{100, PageUnlimited, 1, query, dest, extract, count, dry, client, ctx}
 
 	if page != nil {
 		c.perPage = page.Per

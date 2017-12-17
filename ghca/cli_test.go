@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewCLI(t *testing.T) {
-	cli, err := NewCLI("token", "foo stars>1", "dest", "", 10)
+	cli, err := NewCLI("token", "foo stars>1", "dest", "", 10, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,13 +23,16 @@ func TestNewCLI(t *testing.T) {
 	if cli.count != 10 {
 		t.Error("Unexpected count", cli.count)
 	}
+	if !cli.dry {
+		t.Error("Unexpected dry value", cli.dry)
+	}
 	if cli.extract != nil {
 		t.Error("Invalid regular expression for empty extract pattern:", *cli.extract)
 	}
 }
 
 func TestEmptyDest(t *testing.T) {
-	cli, err := NewCLI("token", "query", "", "", 0)
+	cli, err := NewCLI("token", "query", "", "", 0, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +49,7 @@ func TestEmptyQuery(t *testing.T) {
 		"   ",
 		"	",
 	} {
-		if _, err := NewCLI("token", q, "", "", 0); err == nil {
+		if _, err := NewCLI("token", q, "", "", 0, false); err == nil {
 			t.Errorf("Empty query should raise an error: '%s'", q)
 		}
 	}
@@ -55,7 +58,7 @@ func TestEmptyQuery(t *testing.T) {
 func TestGitHubTokenEnv(t *testing.T) {
 	saved := os.Getenv("GITHUB_TOKEN")
 	os.Setenv("GITHUB_TOKEN", "foobar")
-	cli, err := NewCLI("", "query", "", "", 0)
+	cli, err := NewCLI("", "query", "", "", 0, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -66,7 +69,7 @@ func TestGitHubTokenEnv(t *testing.T) {
 }
 
 func TestInvalidRegexp(t *testing.T) {
-	if _, err := NewCLI("token", "query", "", "(foo", 0); err == nil {
+	if _, err := NewCLI("token", "query", "", "(foo", 0, false); err == nil {
 		t.Error("Broken regexp must raise an error")
 	}
 }
@@ -74,7 +77,7 @@ func TestInvalidRegexp(t *testing.T) {
 func TestMakeDest(t *testing.T) {
 	defer os.Remove("repos")
 
-	cli, err := NewCLI("token", "query", "", "", 0)
+	cli, err := NewCLI("token", "query", "", "", 0, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,6 +99,22 @@ func TestMakeDest(t *testing.T) {
 	}
 }
 
+func TestDoNotMakeDestOnDryRun(t *testing.T) {
+	cli, err := NewCLI("", "user:rhysd", "", "", 1, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := cli.ensureReposDir(); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := os.Stat("repos"); err == nil {
+		os.RemoveAll("repos")
+		t.Fatal("'repos' directory was created")
+	}
+}
+
 func TestDestAlreadyExistAsFile(t *testing.T) {
 	defer os.Remove("repos")
 	f, err := os.OpenFile("repos", os.O_RDONLY|os.O_CREATE, 0666)
@@ -105,7 +124,7 @@ func TestDestAlreadyExistAsFile(t *testing.T) {
 	if err := f.Close(); err != nil {
 		t.Fatal(err)
 	}
-	cli, err := NewCLI("token", "query", "", "", 0)
+	cli, err := NewCLI("token", "query", "", "", 0, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,7 +139,7 @@ func TestRunCLI(t *testing.T) {
 	}
 	defer os.Remove("test")
 
-	cli, err := NewCLI("", "user:rhysd non-existing-repo", "test", "", 0)
+	cli, err := NewCLI("", "user:rhysd non-existing-repo", "test", "", 0, false)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -22,9 +22,13 @@ type CLI struct {
 	dest    string
 	extract *regexp.Regexp // Maybe nil
 	count   int
+	dry     bool
 }
 
 func (c *CLI) ensureReposDir() error {
+	if c.dry {
+		return nil
+	}
 	s, err := os.Stat(c.dest)
 	if err != nil {
 		return os.Mkdir(c.dest, 0755)
@@ -40,40 +44,40 @@ func (c *CLI) Run() (err error) {
 	if err = c.ensureReposDir(); err != nil {
 		return
 	}
-	col := NewCollector(c.query, c.token, c.dest, c.extract, c.count, nil)
+	col := NewCollector(c.query, c.token, c.dest, c.extract, c.count, c.dry, nil)
 	_, _, err = col.Collect()
 	return
 }
 
 // NewCLI creates a new command line interface to run github-clone-all.
 // Query ('q' parameter) must not be empty.
-func NewCLI(t, q, d, e string, c int) (*CLI, error) {
+func NewCLI(token, query, dest, extract string, count int, dry bool) (*CLI, error) {
 	var err error
 
-	if t == "" {
-		t = os.Getenv("GITHUB_TOKEN")
+	if token == "" {
+		token = os.Getenv("GITHUB_TOKEN")
 	}
 
-	if d == "" {
-		d, err = os.Getwd()
+	if dest == "" {
+		dest, err = os.Getwd()
 		if err != nil {
 			return nil, err
 		}
-		d = filepath.Join(d, "repos")
+		dest = filepath.Join(dest, "repos")
 	}
 
 	var r *regexp.Regexp
-	if e != "" {
-		r, err = regexp.Compile(e)
+	if extract != "" {
+		r, err = regexp.Compile(extract)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	q = strings.TrimSpace(q)
-	if q == "" {
+	query = strings.TrimSpace(query)
+	if query == "" {
 		return nil, errors.New("Query cannot be empty")
 	}
 
-	return &CLI{t, q, d, r, c}, nil
+	return &CLI{token, query, dest, r, count, dry}, nil
 }

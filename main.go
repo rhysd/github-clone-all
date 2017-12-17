@@ -81,6 +81,7 @@ func main() {
 	extract := flag.String("extract", "", "Regular expression to extract files in each cloned repo")
 	quiet := flag.Bool("quiet", false, "Run quietly. Exit status is non-zero, it means error occurred")
 	count := flag.Int("count", 0, "Max number of repositories to clone")
+	dry := flag.Bool("dry", false, "Do dry run. Only shows which repositories will be cloned by given query with repositorie's descriptions")
 
 	flag.Usage = usage
 	flag.Parse()
@@ -96,7 +97,7 @@ func main() {
 
 	query := strings.Join(flag.Args(), " ")
 
-	cli, err := ghca.NewCLI(*token, query, *dest, *extract, *count)
+	cli, err := ghca.NewCLI(*token, query, *dest, *extract, *count, *dry)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(3)

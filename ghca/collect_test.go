@@ -10,7 +10,7 @@ import (
 )
 
 func TestNewCollector(t *testing.T) {
-	c := NewCollector("foo", "", "", nil, 0, nil)
+	c := NewCollector("foo", "", "", nil, 0, false, nil)
 	if c.perPage != 100 {
 		t.Error("perPage should be 100 by default:", c.perPage)
 	}
@@ -26,7 +26,7 @@ func TestNewCollector(t *testing.T) {
 }
 
 func TestNewCollectorWithConfig(t *testing.T) {
-	c := NewCollector("foo", "", "", nil, 0, &PageConfig{1, 10, 3})
+	c := NewCollector("foo", "", "", nil, 0, false, &PageConfig{1, 10, 3})
 	if c.perPage != 1 {
 		t.Error("perPage should be set to 1:", c.perPage)
 	}
@@ -37,7 +37,7 @@ func TestNewCollectorWithConfig(t *testing.T) {
 		t.Error("page should be set to 3:", c.page)
 	}
 
-	c = NewCollector("foo", "", "", nil, 0, &PageConfig{3, PageUnlimited, 3})
+	c = NewCollector("foo", "", "", nil, 0, false, &PageConfig{3, PageUnlimited, 3})
 	if c.maxPage != 334 {
 		t.Error("maxPage should be calculated to fetch 1000 repos:", c.maxPage)
 	}
@@ -57,7 +57,7 @@ func TestCollectReposTotalIsAFew(t *testing.T) {
 		os.RemoveAll("test")
 	}()
 
-	c := NewCollector("clever-f.vim language:vim fork:false", token, "test", nil, 0, nil)
+	c := NewCollector("clever-f.vim language:vim fork:false", token, "test", nil, 0, false, nil)
 	count, total, err := c.Collect()
 	if err != nil {
 		t.Fatal("Failed to collect", err)
@@ -92,7 +92,7 @@ func TestCollectReposTotalIsLarge(t *testing.T) {
 	}()
 
 	// Get page 4, 5, 6 and each page results in 2 repos
-	c := NewCollector("language:vim fork:false", token, "test", nil, 0, &PageConfig{
+	c := NewCollector("language:vim fork:false", token, "test", nil, 0, false, &PageConfig{
 		Per:   2,
 		Max:   6,
 		Start: 4,
@@ -122,7 +122,7 @@ func TestBadCredential(t *testing.T) {
 	defer func() {
 		os.RemoveAll("test")
 	}()
-	c := NewCollector("clever-f.vim language:vim fork:false", "badcredentials", "test", nil, 0, nil)
+	c := NewCollector("clever-f.vim language:vim fork:false", "badcredentials", "test", nil, 0, false, nil)
 	_, _, err := c.Collect()
 	if err == nil {
 		t.Fatal("Bad credentials should cause an error on collecting")
@@ -143,7 +143,7 @@ func TestSpecifyCount(t *testing.T) {
 		t.Skip("Skipping because API token not found")
 	}
 
-	c := NewCollector("user:rhysd", token, "test", nil, 2, nil)
+	c := NewCollector("user:rhysd", token, "test", nil, 2, false, nil)
 	if c.maxPage != 1 {
 		t.Fatal("Max page should be 1 if count is specified as 2 because of 100 repos per page:", c.maxPage)
 	}
@@ -166,5 +166,23 @@ func TestSpecifyCount(t *testing.T) {
 			ns = append(ns, f.Name())
 		}
 		t.Fatal("Count is specified as 2 but actually 2 repos are not cloned:", count, ", ", strings.Join(ns, " "))
+	}
+}
+
+func TestDryRun(t *testing.T) {
+	token := os.Getenv("GITHUB_TOKEN")
+	if token == "" {
+		t.Skip("Skipping because API token not found")
+	}
+
+	c := NewCollector("user:rhysd", token, "test", nil, 2, true, nil)
+	_, _, err := c.Collect()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := os.Stat("test"); err == nil {
+		os.RemoveAll("test")
+		t.Fatal("'test' directory was created in spite of dry-run")
 	}
 }
