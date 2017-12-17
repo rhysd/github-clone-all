@@ -25,13 +25,13 @@ func TestNewCloner(t *testing.T) {
 	os.Setenv("GIT_EXECUTABLE_PATH", "")
 }
 
-func testRepos(repos []string, t *testing.T) {
+func testRepos(repos []string, para int, t *testing.T) {
 	c := NewCloner("test", nil)
 	defer func() {
 		os.RemoveAll("test")
 	}()
 	c.Err = make(chan error, 10)
-	c.Start()
+	c.Start(para)
 
 	go func() {
 		for err := range c.Err {
@@ -57,7 +57,7 @@ func testRepos(repos []string, t *testing.T) {
 }
 
 func TestClone1Repo(t *testing.T) {
-	testRepos([]string{"rhysd/github-complete.vim"}, t)
+	testRepos([]string{"rhysd/github-complete.vim"}, 0, t)
 }
 
 func TestCloneAFewRepos(t *testing.T) {
@@ -70,7 +70,7 @@ func TestCloneAFewRepos(t *testing.T) {
 		"rhysd/neovim-component",
 		"rhysd/vim-gfm-syntax",
 	}
-	testRepos(repos, t)
+	testRepos(repos, 0, t)
 }
 
 func TestCloneManyRepos(t *testing.T) {
@@ -90,7 +90,7 @@ func TestCloneManyRepos(t *testing.T) {
 		"rhysd/NyaoVim",
 		"rhysd/vim-color-spring-night",
 	}
-	testRepos(repos, t)
+	testRepos(repos, 0, t)
 }
 
 func TestCloneWithExtract(t *testing.T) {
@@ -100,7 +100,7 @@ func TestCloneWithExtract(t *testing.T) {
 		os.RemoveAll("test")
 	}()
 	c.Err = make(chan error, 10)
-	c.Start()
+	c.Start(0)
 
 	go func() {
 		for err := range c.Err {
@@ -127,7 +127,7 @@ func TestCloneWithExtract(t *testing.T) {
 func TestCloneNotExistingRepo(t *testing.T) {
 	c := NewCloner("test", nil)
 	c.Err = make(chan error, 10)
-	c.Start()
+	c.Start(0)
 
 	c.Clone("")
 	c.Shutdown()
@@ -140,4 +140,8 @@ func TestCloneNotExistingRepo(t *testing.T) {
 	default:
 		t.Fatal("Error not reported")
 	}
+}
+
+func TestClone1Worker(t *testing.T) {
+	testRepos([]string{"rhysd/github-complete.vim"}, 1, t)
 }

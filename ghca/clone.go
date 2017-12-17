@@ -109,6 +109,8 @@ func (cl *Cloner) newWorker() {
 }
 
 // Start starts underlying workers and makes ready for running.
+// Parameter 'para' indicates how many workers should be used.a
+// Max number is '# of CPU - 1' and 0 indicates using the default value.
 func (cl *Cloner) Start(para int) {
 	auto := runtime.NumCPU() - 1
 	if para == 0 || para > auto {
