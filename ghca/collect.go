@@ -139,7 +139,7 @@ func NewCollector(query, token, dest string, extract *regexp.Regexp, count int, 
 	}
 	if c.maxPage == PageUnlimited {
 		maxRepos := 1000.0
-		if count != 0 {
+		if 0 < count && count < 1000 {
 			maxRepos = float64(count)
 		}
 		c.maxPage = uint(math.Ceil(maxRepos / float64(c.perPage)))
