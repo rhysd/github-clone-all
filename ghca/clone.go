@@ -19,7 +19,7 @@ type Cloner struct {
 	git     string
 	dest    string
 	extract *regexp.Regexp
-	repos   chan string
+	slugs   chan string
 	// Err is a receiver of errors which occurs while cloning repositories
 	Err chan error
 	wg  sync.WaitGroup
@@ -33,7 +33,7 @@ func NewCloner(dest string, extract *regexp.Regexp) *Cloner {
 		git:     os.Getenv("GIT_EXECUTABLE_PATH"),
 		dest:    dest,
 		extract: extract,
-		repos:   make(chan string, maxBuffer),
+		slugs:   make(chan string, maxBuffer),
 	}
 
 	if c.git == "" {
@@ -43,9 +43,9 @@ func NewCloner(dest string, extract *regexp.Regexp) *Cloner {
 	return c
 }
 
-// Clone clones the repository. Format of 'repo' parameter is 'owner/name'.
-func (cl *Cloner) Clone(repo string) {
-	cl.repos <- repo
+// Clone clones the repository. Format of 'slug' parameter is 'owner/name'.
+func (cl *Cloner) Clone(slug string) {
+	cl.slugs <- slug
 }
 
 func (cl *Cloner) newWorker() {
@@ -60,22 +60,22 @@ func (cl *Cloner) newWorker() {
 
 	go func() {
 		defer cl.wg.Done()
-		for repo := range cl.repos {
-			log.Println("Cloning", repo)
+		for slug := range cl.slugs {
+			log.Println("Cloning", slug)
 
 			var url string
 			if cl.SSH {
-				url = fmt.Sprintf("git@github.com:%s.git", repo)
+				url = fmt.Sprintf("git@github.com:%s.git", slug)
 			} else {
-				url = fmt.Sprintf("https://github.com/%s.git", repo)
+				url = fmt.Sprintf("https://github.com/%s.git", slug)
 			}
 
-			dir := filepath.FromSlash(fmt.Sprintf("%s/%s", dest, repo))
+			dir := filepath.FromSlash(fmt.Sprintf("%s/%s", dest, slug))
 			cmd := exec.Command(git, "clone", "--depth=1", "--single-branch", url, dir)
 			err := cmd.Run()
 
 			if err != nil {
-				log.Println("Failed to clone", repo, err)
+				log.Println("Failed to clone", slug, err)
 				if cl.Err != nil {
 					cl.Err <- err
 				}
@@ -95,7 +95,7 @@ func (cl *Cloner) newWorker() {
 					}
 					return nil
 				}); err != nil {
-					log.Println("Failed to extract files", repo, extract.String(), err)
+					log.Println("Failed to extract files", slug, extract.String(), err)
 					if cl.Err != nil {
 						cl.Err <- err
 					}
@@ -103,7 +103,7 @@ func (cl *Cloner) newWorker() {
 				}
 			}
 
-			log.Println("Cloned:", repo)
+			log.Println("Cloned:", slug)
 		}
 	}()
 }
@@ -124,7 +124,7 @@ func (cl *Cloner) Start(para int) {
 
 // Shutdown stops all workers and waits until all of current tasks are completed.
 func (cl *Cloner) Shutdown() {
-	close(cl.repos)
+	close(cl.slugs)
 	cl.wg.Wait()
 	if cl.Err != nil {
 		close(cl.Err)
