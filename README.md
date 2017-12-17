@@ -56,6 +56,12 @@ $ github-clone-all -count 1 'language:javascript'
 
 Above command will clone the most popular repository of JavaScript on GitHub.
 
+```
+$ github-clone-all -dry 'language:go'
+```
+
+Above command will only list up most popular 1000 repositories of Go instead of cloning them.
+
 
 ## How to get GitHub API token
 
