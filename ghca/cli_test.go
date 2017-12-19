@@ -152,3 +152,21 @@ func TestRunCLI(t *testing.T) {
 		t.Fatal("Dest directory was not created:", err)
 	}
 }
+
+func TestCannotRunCLI(t *testing.T) {
+	defer os.Remove("repos")
+	f, err := os.OpenFile("repos", os.O_RDONLY|os.O_CREATE, 0666)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	cli, err := NewCLI("token", "query", "", "", 0, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := cli.Run(); err == nil {
+		t.Fatal("Error should occur when file is already created")
+	}
+}
