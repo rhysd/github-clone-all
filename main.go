@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/blang/semver"
 	"github.com/rhysd/github-clone-all/ghca"
+	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	"io/ioutil"
 	"log"
 	"os"
@@ -83,6 +85,24 @@ func usage() {
 	flag.PrintDefaults()
 }
 
+func selfUpdate() int {
+	v := semver.MustParse(version)
+
+	latest, err := selfupdate.UpdateSelf(v, "rhysd/github-clone-all")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 3
+	}
+
+	if v.Equals(latest.Version) {
+		fmt.Println("Current version", v, "is the latest")
+	} else {
+		fmt.Println("Successfully updated to version", v)
+		fmt.Println("Release Note:\n", latest.ReleaseNotes)
+	}
+	return 0
+}
+
 func main() {
 	help := flag.Bool("help", false, "Show this help")
 	h := flag.Bool("h", false, "Show this help")
@@ -93,6 +113,7 @@ func main() {
 	count := flag.Int("count", 0, "Max number of repositories to clone")
 	dry := flag.Bool("dry", false, "Do dry run. Only shows which repositories will be cloned by given query with repositorie's descriptions")
 	ver := flag.Bool("version", false, "Show version")
+	update := flag.Bool("selfupdate", false, "Update this tool to the latest")
 
 	flag.Usage = usage
 	flag.Parse()
@@ -105,6 +126,10 @@ func main() {
 	if *ver {
 		fmt.Println(version)
 		os.Exit(0)
+	}
+
+	if *update {
+		os.Exit(selfUpdate())
 	}
 
 	if *quiet {
