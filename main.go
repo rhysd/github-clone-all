@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-const version = "2.2.1"
+const version = "2.3.0"
 
 const usageHeader = `USAGE: github-clone-all [FLAGS] {query}
 
