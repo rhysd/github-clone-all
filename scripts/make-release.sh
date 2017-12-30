@@ -8,7 +8,12 @@ mkdir -p release
 mv github-clone-all_* release/
 cd release
 for bin in *; do
-    mv "$bin" github-clone-all
-    zip "${bin}.zip" github-clone-all
-    rm github-clone-all
+    if [[ "$bin" == *windows* ]]; then
+        command="github-clone-all.exe"
+    else
+        command="github-clone-all"
+    fi
+    mv "$bin" "$command"
+    zip "${bin}.zip" "$command"
+    rm "$command"
 done
