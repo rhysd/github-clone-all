@@ -2,8 +2,10 @@ package ghca
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 )
 
@@ -147,4 +149,34 @@ func TestCloneNotExistingRepo(t *testing.T) {
 
 func TestClone1Worker(t *testing.T) {
 	testRepos([]string{"rhysd/github-complete.vim"}, 1, t)
+}
+
+func TestShallowClone(t *testing.T) {
+	c := NewCloner("test", nil, true)
+	defer func() {
+		os.RemoveAll("test")
+	}()
+	c.Err = make(chan error, 10)
+	c.Start(0)
+
+	go func() {
+		for err := range c.Err {
+			t.Error("Error reported from cloner:", err)
+		}
+	}()
+
+	c.Clone("rhysd/cargo-husky")
+	c.Shutdown()
+
+	cmd := exec.Command("git", "log", "--oneline")
+	cmd.Dir = filepath.Join("test", "rhysd", "cargo-husky")
+	bytes, err := cmd.Output()
+	if err != nil {
+		t.Fatal("git log failed:", err)
+	}
+	lines := strings.Split(string(bytes), "\n")
+	lines = lines[:len(lines)-1]
+	if len(lines) == 1 {
+		t.Fatal("Log should not be one line since it's deep clone:", lines)
+	}
 }
