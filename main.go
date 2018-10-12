@@ -78,6 +78,11 @@ EXAMPLE:
     Above command will only list up most popular 1000 repositories of Go
     instead of cloning them.
 
+  $ github-clone-all -deep 'user:YOUR_USER_NAME fork:false'
+
+    Above command will clone all your repositories (except for forks) with
+    full history.
+
 FLAGS:`
 
 func usage() {
