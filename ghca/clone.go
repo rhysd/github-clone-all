@@ -19,6 +19,7 @@ type Cloner struct {
 	git     string
 	dest    string
 	extract *regexp.Regexp
+	deep    bool
 	slugs   chan string
 	// Err is a receiver of errors which occurs while cloning repositories
 	Err chan error
@@ -28,12 +29,13 @@ type Cloner struct {
 }
 
 // NewCloner creates a new cloner instance. 'extract' parameter can be nil.
-func NewCloner(dest string, extract *regexp.Regexp) *Cloner {
+func NewCloner(dest string, extract *regexp.Regexp, deep bool) *Cloner {
 	c := &Cloner{
 		git:     os.Getenv("GIT_EXECUTABLE_PATH"),
 		dest:    dest,
 		extract: extract,
 		slugs:   make(chan string, maxBuffer),
+		deep:    deep,
 	}
 
 	if c.git == "" {
@@ -52,6 +54,7 @@ func (cl *Cloner) newWorker() {
 	cl.wg.Add(1)
 	dest := cl.dest
 	git := cl.git
+	deep := cl.deep
 
 	var extract *regexp.Regexp
 	if cl.extract != nil {
@@ -71,7 +74,15 @@ func (cl *Cloner) newWorker() {
 			}
 
 			dir := filepath.FromSlash(fmt.Sprintf("%s/%s", dest, slug))
-			cmd := exec.Command(git, "clone", "--depth=1", "--single-branch", url, dir)
+
+			args := make([]string, 0, 5)
+			args = append(args, "clone")
+			if !deep {
+				args = append(args, "--depth=1", "--single-branch")
+			}
+			args = append(args, url, dir)
+
+			cmd := exec.Command(git, args...)
 			err := cmd.Run()
 
 			if err != nil {
