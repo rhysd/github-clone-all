@@ -2,6 +2,8 @@ language: go
 os:
   - linux
   - osx
+env:
+  - GO111MODULE=on
 install:
   - go get -t -d -v ./...
   - go version
