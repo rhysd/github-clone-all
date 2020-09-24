@@ -3,13 +3,14 @@ package ghca
 import (
 	"context"
 	"fmt"
-	"github.com/google/go-github/github"
-	"golang.org/x/oauth2"
 	"log"
 	"math"
 	"net/http"
 	"regexp"
 	"time"
+
+	"github.com/google/go-github/github"
+	"golang.org/x/oauth2"
 )
 
 // Collector is a worker to fetch repositories via GitHub Search API and clone them all.
@@ -32,7 +33,9 @@ type Collector struct {
 	// Dry indicates doing dry-run instead of cloning repositories
 	Dry bool
 	// Deep indicates shallow clone is not used
-	Deep   bool
+	Deep bool
+	// SSH indicates use of SSH protocol instead of HTTPS
+	SSH    bool
 	client *github.Client
 	ctx    context.Context
 }
@@ -56,7 +59,7 @@ func (col *Collector) searchRepos() (*github.RepositoriesSearchResult, error) {
 func (col *Collector) Collect() (int, int, error) {
 	log.Println("Searching GitHub repositories with query:", col.Query)
 	start := time.Now()
-	cloner := NewCloner(col.Dest, col.Extract, col.Deep)
+	cloner := NewCloner(col.Dest, col.Extract, col.Deep, col.SSH)
 	if !col.Dry {
 		cloner.Start(col.Count)
 	}
@@ -123,7 +126,7 @@ type PageConfig struct {
 const PageUnlimited uint = 0
 
 // NewCollector creates Collector instance.
-func NewCollector(query, token, dest string, extract *regexp.Regexp, count int, dry bool, deep bool, page *PageConfig) *Collector {
+func NewCollector(query, token, dest string, extract *regexp.Regexp, count int, dry bool, deep bool, ssh bool, page *PageConfig) *Collector {
 	ctx := context.Background()
 
 	var auth *http.Client
@@ -135,7 +138,7 @@ func NewCollector(query, token, dest string, extract *regexp.Regexp, count int, 
 	}
 
 	client := github.NewClient(auth)
-	c := &Collector{100, PageUnlimited, 1, query, dest, extract, count, dry, deep, client, ctx}
+	c := &Collector{100, PageUnlimited, 1, query, dest, extract, count, dry, deep, ssh, client, ctx}
 
 	if page != nil {
 		c.perPage = page.Per

@@ -24,18 +24,19 @@ type Cloner struct {
 	// Err is a receiver of errors which occurs while cloning repositories
 	Err chan error
 	wg  sync.WaitGroup
-	// SSH is a flag to use SSH for git-clone. By default, it's false and HTTPS is used.
-	SSH bool
+	// ssh is a flag to use SSH for git-clone. By default, it's false and HTTPS is used.
+	ssh bool
 }
 
 // NewCloner creates a new cloner instance. 'extract' parameter can be nil.
-func NewCloner(dest string, extract *regexp.Regexp, deep bool) *Cloner {
+func NewCloner(dest string, extract *regexp.Regexp, deep bool, ssh bool) *Cloner {
 	c := &Cloner{
 		git:     os.Getenv("GIT_EXECUTABLE_PATH"),
 		dest:    dest,
 		extract: extract,
 		slugs:   make(chan string, maxBuffer),
 		deep:    deep,
+		ssh:     ssh,
 	}
 
 	if c.git == "" {
@@ -67,7 +68,7 @@ func (cl *Cloner) newWorker() {
 			log.Println("Cloning", slug)
 
 			var url string
-			if cl.SSH {
+			if cl.ssh {
 				url = fmt.Sprintf("git@github.com:%s.git", slug)
 			} else {
 				url = fmt.Sprintf("https://github.com/%s.git", slug)

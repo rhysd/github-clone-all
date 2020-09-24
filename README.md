@@ -65,10 +65,11 @@ $ github-clone-all -dry 'language:go'
 Above command will only list up most popular 1000 repositories of Go instead of cloning them.
 
 ```
-$ github-clone-all -deep 'user:YOUR_USER_NAME fork:false'
+$ github-clone-all -deep -ssh 'user:YOUR_USER_NAME fork:false'
 ```
 
 Above command will clone all your repositories (except for forks) with full history.
+It's useful when you want to have all repositories in your local.
 
 
 ## How to get GitHub API token

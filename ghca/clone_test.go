@@ -10,7 +10,7 @@ import (
 )
 
 func TestNewCloner(t *testing.T) {
-	c := NewCloner("/path/to/dest", nil, true)
+	c := NewCloner("/path/to/dest", nil, true, true)
 	if c.git != "git" {
 		t.Error("Git command should be initialized as 'git' by default:", c.git)
 	}
@@ -20,9 +20,12 @@ func TestNewCloner(t *testing.T) {
 	if !c.deep {
 		t.Error("deep clone should be set:", c.deep)
 	}
+	if !c.ssh {
+		t.Error("ssh should be set:", c.ssh)
+	}
 
 	os.Setenv("GIT_EXECUTABLE_PATH", "/path/to/git")
-	c = NewCloner("/path/to/dest", nil, false)
+	c = NewCloner("/path/to/dest", nil, false, false)
 	if c.git != "/path/to/git" {
 		t.Error("Git command should respect environment variable $GIT_EXECUTABLE_PATH:", c.git)
 	}
@@ -31,7 +34,7 @@ func TestNewCloner(t *testing.T) {
 }
 
 func testRepos(repos []string, para int, t *testing.T) {
-	c := NewCloner("test", nil, false)
+	c := NewCloner("test", nil, false, false)
 	defer func() {
 		os.RemoveAll("test")
 	}()
@@ -100,7 +103,7 @@ func TestCloneManyRepos(t *testing.T) {
 
 func TestCloneWithExtract(t *testing.T) {
 	re := regexp.MustCompile("\\.vim$")
-	c := NewCloner("test", re, false)
+	c := NewCloner("test", re, false, false)
 	defer func() {
 		os.RemoveAll("test")
 	}()
@@ -130,7 +133,7 @@ func TestCloneWithExtract(t *testing.T) {
 }
 
 func TestCloneNotExistingRepo(t *testing.T) {
-	c := NewCloner("test", nil, false)
+	c := NewCloner("test", nil, false, false)
 	c.Err = make(chan error, 10)
 	c.Start(0)
 
@@ -152,7 +155,7 @@ func TestClone1Worker(t *testing.T) {
 }
 
 func TestShallowClone(t *testing.T) {
-	c := NewCloner("test", nil, true)
+	c := NewCloner("test", nil, true, false)
 	defer func() {
 		os.RemoveAll("test")
 	}()

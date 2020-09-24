@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewCLI(t *testing.T) {
-	cli, err := NewCLI("token", "foo stars>1", "dest", "", 10, true, true)
+	cli, err := NewCLI("token", "foo stars>1", "dest", "", 10, true, true, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,13 +29,16 @@ func TestNewCLI(t *testing.T) {
 	if !cli.deep {
 		t.Error("Unexpected deep value", cli.deep)
 	}
+	if !cli.ssh {
+		t.Error("Unexpected ssh value", cli.ssh)
+	}
 	if cli.extract != nil {
 		t.Error("Invalid regular expression for empty extract pattern:", *cli.extract)
 	}
 }
 
 func TestEmptyDest(t *testing.T) {
-	cli, err := NewCLI("token", "query", "", "", 0, false, false)
+	cli, err := NewCLI("token", "query", "", "", 0, false, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,7 +55,7 @@ func TestEmptyQuery(t *testing.T) {
 		"   ",
 		"	",
 	} {
-		if _, err := NewCLI("token", q, "", "", 0, false, false); err == nil {
+		if _, err := NewCLI("token", q, "", "", 0, false, false, false); err == nil {
 			t.Errorf("Empty query should raise an error: '%s'", q)
 		}
 	}
@@ -61,7 +64,7 @@ func TestEmptyQuery(t *testing.T) {
 func TestGitHubTokenEnv(t *testing.T) {
 	saved := os.Getenv("GITHUB_TOKEN")
 	os.Setenv("GITHUB_TOKEN", "foobar")
-	cli, err := NewCLI("", "query", "", "", 0, false, false)
+	cli, err := NewCLI("", "query", "", "", 0, false, false, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -72,7 +75,7 @@ func TestGitHubTokenEnv(t *testing.T) {
 }
 
 func TestInvalidRegexp(t *testing.T) {
-	if _, err := NewCLI("token", "query", "", "(foo", 0, false, false); err == nil {
+	if _, err := NewCLI("token", "query", "", "(foo", 0, false, false, false); err == nil {
 		t.Error("Broken regexp must raise an error")
 	}
 }
@@ -80,7 +83,7 @@ func TestInvalidRegexp(t *testing.T) {
 func TestMakeDest(t *testing.T) {
 	defer os.Remove("repos")
 
-	cli, err := NewCLI("token", "query", "", "", 0, false, false)
+	cli, err := NewCLI("token", "query", "", "", 0, false, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +106,7 @@ func TestMakeDest(t *testing.T) {
 }
 
 func TestDoNotMakeDestOnDryRun(t *testing.T) {
-	cli, err := NewCLI("", "user:rhysd", "", "", 1, true, false)
+	cli, err := NewCLI("", "user:rhysd", "", "", 1, true, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +130,7 @@ func TestDestAlreadyExistAsFile(t *testing.T) {
 	if err := f.Close(); err != nil {
 		t.Fatal(err)
 	}
-	cli, err := NewCLI("token", "query", "", "", 0, false, false)
+	cli, err := NewCLI("token", "query", "", "", 0, false, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,7 +145,7 @@ func TestRunCLI(t *testing.T) {
 	}
 	defer os.Remove("test")
 
-	cli, err := NewCLI("", "user:rhysd non-existing-repo", "test", "", 0, false, false)
+	cli, err := NewCLI("", "user:rhysd non-existing-repo", "test", "", 0, false, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -165,7 +168,7 @@ func TestCannotRunCLI(t *testing.T) {
 	if err := f.Close(); err != nil {
 		t.Fatal(err)
 	}
-	cli, err := NewCLI("token", "query", "", "", 0, false, false)
+	cli, err := NewCLI("token", "query", "", "", 0, false, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}

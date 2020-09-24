@@ -3,13 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/blang/semver"
-	"github.com/rhysd/github-clone-all/ghca"
-	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/blang/semver"
+	"github.com/rhysd/github-clone-all/ghca"
+	"github.com/rhysd/go-github-selfupdate/selfupdate"
 )
 
 const version = "2.4.0"
@@ -78,10 +79,11 @@ EXAMPLE:
     Above command will only list up most popular 1000 repositories of Go
     instead of cloning them.
 
-  $ github-clone-all -deep 'user:YOUR_USER_NAME fork:false'
+  $ github-clone-all -deep -ssh 'user:YOUR_USER_NAME fork:false'
 
     Above command will clone all your repositories (except for forks) with
-    full history.
+    full history. It's useful when you want to have all repositories in your
+    local.
 
 FLAGS:`
 
@@ -118,6 +120,7 @@ func main() {
 	count := flag.Int("count", 0, "Max number of repositories to clone")
 	dry := flag.Bool("dry", false, "Do dry run. Only shows which repositories will be cloned by given query with repositorie's descriptions")
 	deep := flag.Bool("deep", false, "Do not use shallow clone")
+	ssh := flag.Bool("ssh", false, "Use git@github.com/... URL instead of https://github.com/... URL")
 	ver := flag.Bool("version", false, "Show version")
 	update := flag.Bool("selfupdate", false, "Update this tool to the latest")
 
@@ -144,7 +147,7 @@ func main() {
 
 	query := strings.Join(flag.Args(), " ")
 
-	cli, err := ghca.NewCLI(*token, query, *dest, *extract, *count, *dry, *deep)
+	cli, err := ghca.NewCLI(*token, query, *dest, *extract, *count, *dry, *deep, *ssh)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(3)
