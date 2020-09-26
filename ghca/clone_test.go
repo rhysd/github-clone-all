@@ -189,10 +189,10 @@ func TestCloneSSH(t *testing.T) {
 	c.Err = make(chan error, 10)
 	c.Start(0)
 
-	c.Clone("rhysd/github-clone-all")
+	c.Clone("rhysd/unknown-repository-not-existing")
 	c.Shutdown()
 
-	url := "git@github.com:rhysd/github-clone-all.git"
+	url := "git@github.com:rhysd/unknown-repository-not-existing.git"
 
 	select {
 	case err, ok := <-c.Err:
@@ -204,16 +204,6 @@ func TestCloneSSH(t *testing.T) {
 			t.Error("Unexpected error:", msg)
 		}
 	default:
-		cmd := exec.Command("git", "config", "--get", "remote.origin.url")
-		cmd.Dir = filepath.Join("test", "rhysd", "github-clone-all")
-		bytes, err := cmd.Output()
-		if err != nil {
-			t.Fatal("git config --get failed:", err)
-		}
-		out := string(bytes)
-
-		if !strings.HasPrefix(out, url) {
-			t.Error("Not a SSH URL", out)
-		}
+		t.Fatal("Error did not occur")
 	}
 }
