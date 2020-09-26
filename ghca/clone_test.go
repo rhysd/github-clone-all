@@ -196,7 +196,7 @@ func TestCloneSSH(t *testing.T) {
 
 	select {
 	case err, ok := <-c.Err:
-		if !ok || err != nil {
+		if !ok || err == nil {
 			t.Fatal("Error channel is broken:", ok, err)
 		}
 		msg := err.Error()

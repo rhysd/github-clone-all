@@ -90,7 +90,7 @@ func (cl *Cloner) newWorker() {
 			if err != nil {
 				log.Println("Failed to clone", url, err)
 				if cl.Err != nil {
-					cl.Err <- err
+					cl.Err <- fmt.Errorf("Could not clone %s: %v", url, err)
 				}
 				continue
 			}
