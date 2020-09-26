@@ -92,7 +92,7 @@ func TestCloneManyRepos(t *testing.T) {
 		"rhysd/committia.vim",
 		"rhysd/vim-dachs",
 		"rhysd/rust-doc.vim",
-		"rhysd/vim-crystal",
+		"vim-crystal/vim-crystal",
 		"rhysd/vim-wasm",
 		"rhysd/unite-go-import.vim",
 		"rhysd/NyaoVim",
@@ -181,5 +181,26 @@ func TestShallowClone(t *testing.T) {
 	lines = lines[:len(lines)-1]
 	if len(lines) == 1 {
 		t.Fatal("Log should not be one line since it's deep clone:", lines)
+	}
+}
+
+func TestCloneSSH(t *testing.T) {
+	c := NewCloner("test", nil, false, true)
+	c.Err = make(chan error, 10)
+	c.Start(0)
+
+	c.Clone("rhysd/github-clone-all")
+	c.Shutdown()
+
+	cmd := exec.Command("git", "config", "--get", "remote.origin.url")
+	cmd.Dir = filepath.Join("test", "rhysd", "github-clone-all")
+	bytes, err := cmd.Output()
+	if err != nil {
+		t.Fatal("git config --get failed:", err)
+	}
+	out := string(bytes)
+
+	if !strings.HasPrefix(out, "git@github.com:rhysd/github-clone-all.git") {
+		t.Error("Not a SSH URL", out)
 	}
 }

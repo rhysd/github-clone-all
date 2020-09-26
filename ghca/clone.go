@@ -65,14 +65,13 @@ func (cl *Cloner) newWorker() {
 	go func() {
 		defer cl.wg.Done()
 		for slug := range cl.slugs {
-			log.Println("Cloning", slug)
-
 			var url string
 			if cl.ssh {
 				url = fmt.Sprintf("git@github.com:%s.git", slug)
 			} else {
 				url = fmt.Sprintf("https://github.com/%s.git", slug)
 			}
+			log.Println("Cloning", url)
 
 			dir := filepath.FromSlash(fmt.Sprintf("%s/%s", dest, slug))
 
@@ -87,7 +86,7 @@ func (cl *Cloner) newWorker() {
 			err := cmd.Run()
 
 			if err != nil {
-				log.Println("Failed to clone", slug, err)
+				log.Println("Failed to clone", url, err)
 				if cl.Err != nil {
 					cl.Err <- err
 				}
