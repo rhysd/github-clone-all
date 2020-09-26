@@ -141,9 +141,9 @@ func TestCloneNotExistingRepo(t *testing.T) {
 	c.Shutdown()
 
 	select {
-	case err, ok := <-c.Err:
-		if !ok || err == nil {
-			t.Fatal("Error not reported")
+	case err := <-c.Err:
+		if err == nil {
+			t.Fatal("nil error")
 		}
 	default:
 		t.Fatal("Error not reported")
@@ -195,9 +195,9 @@ func TestCloneSSH(t *testing.T) {
 	url := "git@github.com:rhysd/unknown-repository-not-existing.git"
 
 	select {
-	case err, ok := <-c.Err:
-		if !ok || err == nil {
-			t.Fatal("Error channel is broken:", ok, err)
+	case err := <-c.Err:
+		if err == nil {
+			t.Fatal("nil error")
 		}
 		msg := err.Error()
 		if !strings.Contains(msg, url) {
