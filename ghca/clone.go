@@ -91,13 +91,15 @@ func (cl *Cloner) newWorker() {
 
 			cmd := exec.Command(git, args...)
 			cmd.Env = env
-			err := cmd.Run()
+			_, err := cmd.Output()
 
 			if err != nil {
 				log.Println("Failed to clone", url, err)
-				if cl.Err != nil {
-					cl.Err <- fmt.Errorf("Could not clone %s: %v", url, err)
+				stderr := ""
+				if err, ok := err.(*exec.ExitError); ok {
+					stderr = string(err.Stderr)
 				}
+				cl.Err <- fmt.Errorf("Could not clone %s: %v\nstderr: %s", url, err, stderr)
 				continue
 			}
 
