@@ -56,7 +56,7 @@ func (cl *Cloner) newWorker() {
 	dest := cl.dest
 	git := cl.git
 	deep := cl.deep
-	env := append(os.Environ(), "GIT_TERMINAL_PROMPT=0", "GIT_ASKPASS=", "SSH_ASKPASS=")
+	env := append(os.Environ(), "GIT_TERMINAL_PROMPT=0", "GIT_ASKPASS=", "SSH_ASKPASS=", "GIT_SSH_COMMAND=ssh -o StrictHostKeyChecking=no")
 
 	var extract *regexp.Regexp
 	if cl.extract != nil {
