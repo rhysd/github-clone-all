@@ -192,15 +192,28 @@ func TestCloneSSH(t *testing.T) {
 	c.Clone("rhysd/github-clone-all")
 	c.Shutdown()
 
-	cmd := exec.Command("git", "config", "--get", "remote.origin.url")
-	cmd.Dir = filepath.Join("test", "rhysd", "github-clone-all")
-	bytes, err := cmd.Output()
-	if err != nil {
-		t.Fatal("git config --get failed:", err)
-	}
-	out := string(bytes)
+	url := "git@github.com:rhysd/github-clone-all.git"
 
-	if !strings.HasPrefix(out, "git@github.com:rhysd/github-clone-all.git") {
-		t.Error("Not a SSH URL", out)
+	select {
+	case err, ok := <-c.Err:
+		if !ok || err != nil {
+			t.Fatal("Error channel is broken:", ok, err)
+		}
+		msg := err.Error()
+		if !strings.Contains(msg, url) {
+			t.Error("Unexpected error:", msg)
+		}
+	default:
+		cmd := exec.Command("git", "config", "--get", "remote.origin.url")
+		cmd.Dir = filepath.Join("test", "rhysd", "github-clone-all")
+		bytes, err := cmd.Output()
+		if err != nil {
+			t.Fatal("git config --get failed:", err)
+		}
+		out := string(bytes)
+
+		if !strings.HasPrefix(out, url) {
+			t.Error("Not a SSH URL", out)
+		}
 	}
 }
