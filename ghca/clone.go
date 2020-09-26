@@ -56,6 +56,7 @@ func (cl *Cloner) newWorker() {
 	dest := cl.dest
 	git := cl.git
 	deep := cl.deep
+	env := append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 
 	var extract *regexp.Regexp
 	if cl.extract != nil {
@@ -83,6 +84,7 @@ func (cl *Cloner) newWorker() {
 			args = append(args, url, dir)
 
 			cmd := exec.Command(git, args...)
+			cmd.Env = env
 			err := cmd.Run()
 
 			if err != nil {
