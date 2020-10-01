@@ -82,8 +82,7 @@ EXAMPLE:
   $ github-clone-all -deep -ssh 'user:YOUR_USER_NAME fork:false'
 
     Above command will clone all your repositories (except for forks) with
-    full history. It's useful when you want to have all repositories in your
-    local.
+    full history. It's useful when you want to clone all your repositories.
 
 FLAGS:`
 
