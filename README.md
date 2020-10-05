@@ -9,18 +9,18 @@ Clone matching repos on GitHub
 $ github-clone-all [flags] {query}
 ```
 
-`github-clone-all` is a small command to clone all repositories matching to given query and
+`github-clone-all` is a small command to clone all repositories matching to the given query and
 language via [GitHub Search API][]. To know the detail of query, please read
 [official document for GitHub Repository Search][GitHub Repository Search]. The query should be in
 [GitHub search syntax][] and cannot be empty. It clones many repositories in parallel. Please see
 `-help` option to know all flags.
 
-Repository is cloned to 'dest' directory. It is `$cwd/repos` by default and can be specified with
+Repositories re cloned to 'dest' directory. It is `./repos` by default and can be specified with
 `-dest` flag. And in order to reduce size of cloned repositories, `-extract` option is available.
-`-extract` only leaves files matching to given regular expression.
+`-extract` only leaves files matching to the given regular expression in cloned repository.
 
-Because of restriction of GitHub search API, max number of results is 1000 repositories. And you may
-need to gain GitHub API token in advance to avoid reaching API rate limit. `github-clone-all` will
+Because of restriction of GitHub search API, the max number of results is 1000 repositories. And you
+may need to get GitHub API token in advance to avoid hitting API rate limit. `github-clone-all` will
 refer the token via `-token` flag or `$GITHUB_TOKEN` environment variable.
 
 All arguments in `{query}` are regarded as query. For example, `github-clone-all foo bar` will search
@@ -43,11 +43,12 @@ $ go get github.com/rhysd/github-clone-all
 $ github-clone-all -extract '(\.vim|vimrc)$' 'language:vim fork:false stars:>1'
 ```
 
-Above command will clone first 1000 repositories into 'repos' directory in the current working
-directory. And it only leaves files whose file name ends with `.vim` or `vimrc`.
-So it collects many Vim script codes from famous repositories on GitHub.
+The above command will clone first 1000 repositories into `./repos` directory directory. And it only
+leaves files whose file name ends with `.vim` or `vimrc`.
+So it collects many Vim script files from famous repositories on GitHub.
 
 Query condition:
+
 - language is 'vim'
 - not a fork repo
 - stars of repo is more than 1
@@ -56,19 +57,19 @@ Query condition:
 $ github-clone-all -count 1 'language:javascript'
 ```
 
-Above command will clone the most popular repository of JavaScript on GitHub.
+The above command will clone the most popular repository of JavaScript on GitHub.
 
 ```
 $ github-clone-all -dry 'language:go'
 ```
 
-Above command will only list up most popular 1000 repositories of Go instead of cloning them.
+The above command will only list up most popular 1000 repositories of Go instead of cloning them.
 
 ```
 $ github-clone-all -deep -ssh 'user:YOUR_USER_NAME fork:false'
 ```
 
-Above command will clone all your repositories (except for forks) with full history.
+The above command will clone all your repositories (except for forks) with full history.
 It's useful when you want to clone all your repositories.
 
 
@@ -90,7 +91,7 @@ functions of the tool.
 import "github.com/rhysd/github-clone-all/ghca"
 ```
 
-Please read [documentation][GoDoc] for more detail.
+Please read [documentation][GoDoc] for more details.
 
 ## License
 
