@@ -35,7 +35,6 @@ Use `go install` or [released binaries](https://github.com/rhysd/github-clone-al
 ```
 $ go install github.com/rhysd/github-clone-all@latest
 $ github-clone-all
-
 ```
 
 
