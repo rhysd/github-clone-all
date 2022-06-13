@@ -67,7 +67,6 @@ $ github-clone-all -dry 'language:go'
 
 The above command will only list up most popular 1000 repositories of Go instead of cloning them.
 
-
 ```
 $ github-clone-all -deep -ssh 'user:YOUR_USER_NAME fork:false'
 ```
