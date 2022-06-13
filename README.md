@@ -30,10 +30,12 @@ as `github-clone-all 'foo bar'`.
 
 ## Installation
 
-Use `go get` or [released binaries](https://github.com/rhysd/github-clone-all/releases).
+Use `go install` or [released binaries](https://github.com/rhysd/github-clone-all/releases).
 
 ```
-$ go get github.com/rhysd/github-clone-all
+$ go install github.com/rhysd/github-clone-all@latest
+$ github-clone-all
+
 ```
 
 
